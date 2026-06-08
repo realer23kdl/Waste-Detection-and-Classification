@@ -12,6 +12,7 @@ import sys
 # Thêm đường dẫn gốc để import file dataset.py
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from src.data_prep.dataset import TrashDataset
+from src.models.classifier import TrashClassifier
 
 def set_seed(seed=42):
     """Cố định Random Seed để có thể tái lập kết quả (Theo đúng Rubric)"""
@@ -145,20 +146,10 @@ if __name__ == "__main__":
         train_loader = DataLoader(train_dataset, batch_size=args.batch, shuffle=True)
         val_loader = DataLoader(train_dataset, batch_size=args.batch, shuffle=False) # Dùng tạm train làm val để test
         
-        # 5. Khởi tạo Mô hình động dựa trên Argparse
-        print(f"Đang khởi tạo mô hình {args.model}...")
-        if args.model == 'resnet50':
-            model = models.resnet50(pretrained=True)
-            num_ftrs = model.fc.in_features
-            model.fc = nn.Linear(num_ftrs, num_classes)
-        elif args.model == 'efficientnet_b0':
-            model = models.efficientnet_b0(pretrained=True)
-            num_ftrs = model.classifier[1].in_features
-            model.classifier[1] = nn.Linear(num_ftrs, num_classes)
-        elif args.model == 'mobilenet_v3':
-            model = models.mobilenet_v3_small(pretrained=True)
-            num_ftrs = model.classifier[3].in_features
-            model.classifier[3] = nn.Linear(num_ftrs, num_classes)
+        # 5. Khởi tạo Mô hình động dựa trên Argparse (SỬ DỤNG OOP TRASH CLASSIFIER)
+        print(f"Đang khởi tạo mô hình {args.model} thông qua OOP TrashClassifier...")
+        classifier_wrapper = TrashClassifier(model_name=args.model, num_classes=num_classes, pretrained=True)
+        model = classifier_wrapper.model
             
         # 6. Truyền class_weights vào Trainer
         trainer = ClassifierTrainer(

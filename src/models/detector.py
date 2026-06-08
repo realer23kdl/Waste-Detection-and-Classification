@@ -45,3 +45,39 @@ class TrashDetector:
             
         print(f"[Detector] Đã phát hiện {len(bounding_boxes)} cục rác trong ảnh.")
         return bounding_boxes
+
+    def train(self, data_yaml_path: str, epochs: int = 50, batch_size: int = 16, patience: int = 25, imgsz: int = 640, project: str = 'runs/detect', name: str = 'yolov8_trashnet'):
+        """
+        Huấn luyện mô hình YOLO trực tiếp qua OOP.
+        """
+        print(f"[Detector] Bắt đầu huấn luyện mô hình {self.model_type.upper()}...")
+        if self.model_type in ['yolo', 'rtdetr']:
+            results = self.model.train(
+                data=data_yaml_path,
+                epochs=epochs,
+                batch=batch_size,
+                imgsz=imgsz,
+                project=project,
+                name=name,
+                exist_ok=True,
+                plots=True,
+                patience=patience,
+                save=True,
+                save_period=10,
+                cos_lr=True,
+                lr0=0.01,
+                lrf=0.01,
+                mosaic=1.0,
+                degrees=10.0,
+                scale=0.0,
+                perspective=0.0,
+                mixup=0.0,
+                flipud=0.0,
+                hsv_h=0.015,
+                hsv_s=0.7,
+                hsv_v=0.4,
+                fliplr=0.5,
+            )
+            return results
+        else:
+            raise NotImplementedError("Chưa hỗ trợ huấn luyện cho mô hình này")

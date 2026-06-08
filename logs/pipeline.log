@@ -1,0 +1,32 @@
+2026-06-09 00:59:16,789 - [root] - INFO - Hệ thống Logger đã sẵn sàng. File log: ./logs/pipeline.log
+2026-06-09 00:59:16,799 - [root] - INFO - BẮT ĐẦU CHẠY PIPELINE CHUẨN BỊ DỮ LIỆU...
+2026-06-09 00:59:16,803 - [TACO_Pipeline] - INFO - --- GIAI ĐOẠN TIỀN XỬ LÝ TĨNH (XỬ LÝ RAW ANNS) ---
+2026-06-09 00:59:16,806 - [TACO_Pipeline] - INFO - Bước 1: Nạp JSON...
+2026-06-09 00:59:16,807 - [IOUtils] - INFO - Đang nạp dữ liệu từ: ./datasets/raw/annotations.json...
+2026-06-09 00:59:16,844 - [IOUtils] - INFO - Đang nạp dữ liệu từ: ./datasets/config/mapping_label.json...
+2026-06-09 00:59:16,876 - [TACO_Pipeline] - INFO - Bước 2: Gom nhãn 60 -> 7...
+2026-06-09 00:59:16,879 - [BaseProcessor] - INFO - [CategoryMappingProcessor] Đã khởi tạo processor với 1 ảnh.
+2026-06-09 00:59:16,882 - [CategoryMappingProcessor] - INFO - CategoryMappingProcessor: Bắt đầu quá trình đồng bộ hóa danh mục...
+2026-06-09 00:59:16,885 - [CategoryMappingProcessor] - INFO - CategoryMappingProcessor: Hoàn tất! Thu gọn 2 loại về 2 loại nhãn.
+2026-06-09 00:59:16,887 - [IOUtils] - INFO - Chuẩn bị lưu COCO JSON tại: ./datasets/processed/taco_to_detectwaste_annotations.json
+2026-06-09 00:59:16,890 - [IOUtils] - INFO - Lưu file thành công! 1 ảnh, 2 nhãn.
+2026-06-09 00:59:16,892 - [TACO_Pipeline] - INFO - Bước 3: Chia Train/Test...
+2026-06-09 00:59:16,896 - [root] - ERROR - Pipeline sập do lỗi: With n_samples=1, test_size=0.2 and train_size=None, the resulting train set will be empty. Adjust any of the aforementioned parameters.
+Traceback (most recent call last):
+  File "D:\Nam3\HK2\HocSau4KDL\Đồ án môn học\our_pipeline\main_prep.py", line 29, in <module>
+    data_pipeline.execute(test_size=args.test_size, random_state=args.random_state)
+  File "D:\Nam3\HK2\HocSau4KDL\Đồ án môn học\our_pipeline\src\pipeline\taco_pipeline.py", line 36, in execute
+    train_7_classes, test_7_classes = splitter.split(dataset_7_classes)
+                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Nam3\HK2\HocSau4KDL\Đồ án môn học\our_pipeline\src\data_prep\splitters\multi_label_splitter.py", line 30, in split
+    train_index, test_index = next(strat_split.split(images, feature_matrix))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanhi\anaconda3\Lib\site-packages\sklearn\model_selection\_split.py", line 1909, in split
+    for train, test in self._iter_indices(X, y, groups):
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanhi\anaconda3\Lib\site-packages\iterstrat\ml_stratifiers.py", line 342, in _iter_indices
+    n_train, n_test = _validate_shuffle_split(n_samples, self.test_size,
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hanhi\anaconda3\Lib\site-packages\sklearn\model_selection\_split.py", line 2481, in _validate_shuffle_split
+    raise ValueError(
+ValueError: With n_samples=1, test_size=0.2 and train_size=None, the resulting train set will be empty. Adjust any of the aforementioned parameters.

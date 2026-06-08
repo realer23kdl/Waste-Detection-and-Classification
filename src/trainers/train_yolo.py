@@ -1,8 +1,13 @@
 import argparse
 import yaml
 import os
+import sys
 from ultralytics import YOLO
 import wandb
+
+# Thêm đường dẫn gốc để import file detector.py
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+from src.models.detector import TrashDetector
 
 def create_yaml_if_needed(data_path):
     """Sử dụng data.yaml có sẵn hoặc tự tạo mới nếu cần"""
@@ -41,49 +46,16 @@ def train_yolo_model(data_path: str, model_name: str = 'yolov8m.pt', epochs: int
     print("Khởi tạo Weights & Biases để ghi log biểu đồ...")
     wandb.init(project="trashnet-yolo-detection", job_type="training")
     
-    print(f"Nạp mô hình {model_name} (Não to hơn, chuyên trị rác nhỏ)...")
-    model = YOLO(model_name)
+    print(f"Nạp mô hình {model_name} thông qua OOP TrashDetector...")
+    detector = TrashDetector(model_path=model_name, model_type='yolo' if 'yolo' in model_name else 'rtdetr')
     
     print("Bắt đầu huấn luyện...")
-    results = model.train(
-        data=yaml_path,
+    results = detector.train(
+        data_yaml_path=yaml_path,
         epochs=epochs,
-        batch=batch_size,
-        imgsz=640,
-        project='runs/detect',
-        name='yolov8m_trashnet',
-        exist_ok=True,
-        plots=True,
-        
-        # --- BỔ SUNG CÁC TIÊU CHÍ RUBRIC (CHECKPOINT, EARLY STOPPING, LR SCHEDULER) ---
-        
-        # 1. Early Stopping (Dừng sớm tránh Overfitting)
-        patience=patience,       # Dừng huấn luyện nếu mAP không tăng sau n epochs
-        
-        # 2. Checkpointing (Lưu trọng số tự động)
-        save=True,         # Tự động lưu best.pt và last.pt
-        save_period=10,    # Lưu thêm 1 file checkpoint dự phòng mỗi 10 epochs
-        
-        # 3. Learning Rate Scheduler (Điều chỉnh tốc độ học)
-        cos_lr=True,       # Kích hoạt Cosine Annealing Scheduler (Giảm LR theo hình sin)
-        lr0=0.01,          # Tốc độ học khởi tạo ban đầu
-        lrf=0.01,          # Tốc độ học cuối cùng (lr0 * lrf = 0.0001)
-        
-        # --- BỘ KỸ THUẬT TĂNG CƯỜNG DỮ LIỆU (ĐÃ TỐI ƯU CHO RÁC NHỎ) ---
-        mosaic=1.0,  # Vẫn giữ nguyên ghép 4 ảnh để học bối cảnh
-        degrees=10.0, # Xoay nhẹ 10 độ
-        
-        # Tắt các hiệu ứng phá hủy rác nhỏ:
-        scale=0.0,    # Không zoom nhỏ rác lại
-        perspective=0.0, # Không bóp méo 3D
-        mixup=0.0,    # Không làm mờ rác
-        flipud=0.0,   # Không lật lộn ngược rác (rác rơi trên đất hiếm khi lộn ngược)
-        
-        # Thay đổi màu sắc và lật ngang vẫn an toàn
-        hsv_h=0.015,
-        hsv_s=0.7,
-        hsv_v=0.4,
-        fliplr=0.5,
+        batch_size=batch_size,
+        patience=patience,
+        name='yolov8m_trashnet'
     )
     
     print(f"Huấn luyện hoàn tất! Trọng số tốt nhất được lưu tại: runs/detect/yolov8s_trashnet/weights/best.pt")
