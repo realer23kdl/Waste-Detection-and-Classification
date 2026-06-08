@@ -47,13 +47,22 @@ Mô hình YOLOv8 Medium đã được tùy chỉnh cấu hình để đáp ứng
 - **Checkpointing (save_period=10):** Lưu backup mỗi 10 epochs để chống mất mát.
 - **Cosine LR Scheduler (cos_lr=True):** Giúp đồ thị hàm Loss hội tụ đẹp.
 
-**Lệnh huấn luyện:**
+**Lệnh huấn luyện YOLO/RT-DETR:**
 ```bash
 # Tắt wandb để tránh lỗi hỏi API Key trên Kaggle
 %env WANDB_MODE=disabled
 
-# Khởi động quy trình Train
+# Khởi động quy trình Train YOLOv8 Medium (Mặc định)
 !python src/trainers/train_yolo.py --data_path /đường/dẫn/đến/file/data.yaml --epochs 150 --batch 16
+
+# Hoặc đổi sang train RT-DETR cực kỳ dễ dàng:
+!python src/trainers/train_yolo.py --data_path /đường/dẫn/đến/file/data.yaml --model yolov8m-rtdetr.pt
+```
+
+**Lệnh huấn luyện Classifier:**
+Hỗ trợ chuyển đổi nhanh giữa `efficientnet_b0`, `resnet50`, và `mobilenet_v3`:
+```bash
+!python src/trainers/train_classifier.py --data_path datasets/classifier_data/train --model resnet50 --epochs 50
 ```
 
 ---
