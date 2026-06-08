@@ -202,6 +202,11 @@ if __name__ == "__main__":
         
         # 3. Vẽ Ma trận nhầm lẫn
         evaluator.plot_confusion_matrix(y_true, y_pred, save_path=f"confusion_matrix_{args.model}.png")
+        
+        # 4. Trực quan hóa ảnh phân loại sai (Rubric: Error Analysis)
+        print("Đang trích xuất và trực quan hóa các mẫu dự đoán sai...")
+        evaluator.plot_wrong_predictions(train_dataset, y_true, y_pred, num_samples=9, save_path=f"error_analysis_{args.model}.png")
+        
         print("\n[HOÀN TẤT] Quá trình huấn luyện và đánh giá mô hình đã kết thúc.")
         
     else:

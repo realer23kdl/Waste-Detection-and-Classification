@@ -52,7 +52,66 @@ class Evaluator:
         
         plt.savefig(save_path, dpi=300)
         print(f"[Metrics] Đã lưu biểu đồ ma trận nhầm lẫn tại: {save_path}")
-        plt.show()
+        # plt.show() # Tạm tắt show() tự động để chạy mượt trên Kaggle/Server
+
+    def plot_wrong_predictions(self, dataset, y_true, y_pred, num_samples=9, save_path="wrong_predictions.png"):
+        """
+        [Rubric: Error Analysis]
+        Trực quan hóa các mẫu dự đoán sai để phân tích điểm yếu của mô hình.
+        """
+        import matplotlib.pyplot as plt
+        import numpy as np
+        
+        y_true = np.array(y_true)
+        y_pred = np.array(y_pred)
+        
+        # Tìm các index dự đoán sai
+        wrong_indices = np.where(y_true != y_pred)[0]
+        
+        if len(wrong_indices) == 0:
+            print("[Error Analysis] Tuyệt vời! Không có mẫu nào dự đoán sai.")
+            return
+            
+        print(f"[Error Analysis] Đã tìm thấy {len(wrong_indices)} mẫu dự đoán sai. Đang vẽ {min(num_samples, len(wrong_indices))} mẫu tiêu biểu...")
+        
+        # Chọn ngẫu nhiên (hoặc đầu tiên) num_samples
+        np.random.shuffle(wrong_indices)
+        selected_indices = wrong_indices[:num_samples]
+        
+        cols = 3
+        rows = int(np.ceil(len(selected_indices) / cols))
+        
+        fig, axes = plt.subplots(rows, cols, figsize=(12, 4 * rows))
+        axes = axes.flatten() if rows > 1 else [axes]
+        
+        for i, idx in enumerate(selected_indices):
+            # Lấy đường dẫn ảnh từ dataset (vì DataLoader đã xáo trộn nên cần gọi trực tiếp ảnh gốc bằng index)
+            # Lưu ý: DataLoader shuffle=True sẽ làm mất index, nên truyền Dataset không shuffle vào hàm này.
+            image, _ = dataset[idx] 
+            
+            # Un-normalize image
+            img_np = image.numpy().transpose((1, 2, 0))
+            mean = np.array([0.485, 0.456, 0.406])
+            std = np.array([0.229, 0.224, 0.225])
+            img_np = std * img_np + mean
+            img_np = np.clip(img_np, 0, 1)
+            
+            true_label = self.class_names[y_true[idx]]
+            pred_label = self.class_names[y_pred[idx]]
+            
+            ax = axes[i] if len(axes) > 1 else axes[0]
+            ax.imshow(img_np)
+            ax.set_title(f"Thực tế: {true_label}\nDự đoán: {pred_label}", color='red', fontsize=10)
+            ax.axis('off')
+            
+        # Ẩn các ô thừa
+        for j in range(i + 1, len(axes)):
+            if len(axes) > 1:
+                axes[j].axis('off')
+            
+        plt.tight_layout()
+        plt.savefig(save_path, dpi=300)
+        print(f"[Error Analysis] Đã lưu báo cáo trực quan ảnh lỗi tại: {save_path}")
 
     def plot_loss_curves(self, train_losses, val_losses, save_path="loss_curve.png"):
         """
