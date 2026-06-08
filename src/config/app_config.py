@@ -6,7 +6,7 @@ class SystemConfig:
 
 @dataclass
 class DataConfig:
-    TACO_TO_7_CLASSES_MAP: str = './datasets/config/mapping_label.json'
+    TACO_TO_7_CLASSES_MAP: str = './src/config/mapping_label.json'
     RAW_ANNOTATIONS_PATH: str = './datasets/raw/annotations.json'
     PATH_7_CLASSES: str = './datasets/processed/taco_to_detectwaste_annotations.json'
     PATH_MULTI_TRAIN: str = './datasets/train/multi_train_annotations.json'
