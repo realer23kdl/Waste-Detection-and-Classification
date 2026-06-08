@@ -4,7 +4,7 @@ class SystemConfig:
     """Cấu hình vận hành hệ thống."""
     log_file_path: str = './logs/pipeline.log'
 
-@dataclass(frozen=True)
+@dataclass
 class DataConfig:
     TACO_TO_7_CLASSES_MAP: str = './datasets/config/mapping_label.json'
     RAW_ANNOTATIONS_PATH: str = './datasets/raw/annotations.json'
