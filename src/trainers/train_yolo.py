@@ -25,9 +25,9 @@ def create_yaml_if_needed(data_path):
     if os.path.isdir(data_path):
         print(f"Đang tự động tạo tệp {yaml_path} trỏ tới bộ dữ liệu: {data_path}")
         data_yaml = {
-            'train': os.path.join(data_path, 'images'),
-            'val': os.path.join(data_path, 'images'),
-            'test': os.path.join(data_path, 'images'),
+            'train': os.path.join(data_path, 'train/images'),
+            'val': os.path.join(data_path, 'val/images'),
+            'test': os.path.join(data_path, 'val/images'),
             'nc': 6,
             'names': ['Glass', 'Paper', 'Cardboard', 'Plastic', 'Metal', 'Trash']
         }
