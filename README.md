@@ -84,8 +84,12 @@ Hệ thống cho phép bạn chuyển đổi kiến trúc mạng dễ dàng ch�
 
 ## 4. Hướng dẫn Nhận diện (Inference)
 
-Sau khi có được file trọng số `best.pt`, bạn có thể chạy file `main_inference.py` để test thực tế trên ảnh hoặc video:
+Sau khi huấn luyện xong cả Khối Định vị (YOLO) và Khối Phân loại (Classifier), bạn có thể chạy luồng Inference tổng hợp 2 giai đoạn (Detect -> Crop -> Classify) bằng lệnh sau:
 ```bash
-!python main_inference.py --weights runs/detect/yolov8m_trashnet/weights/best.pt --source test_image.jpg
+!python main_inference.py \
+    --pipeline detect_and_classify \
+    --detector runs/detect/yolov8m_trashnet/weights/best.pt \
+    --classifier resnet50 \
+    --image test_image.jpg
 ```
-Kết quả sẽ được lưu vào thư mục `runs/detect/predict/`.
+**Ý nghĩa:** File này sẽ gọi YOLO ra khoanh vùng rác trong bức ảnh `test_image.jpg`, sau đó cắt (crop) từng cục rác ra và ném cho mạng ResNet50 để xác định chính xác nó là rác gì. Kết quả cuối cùng sẽ được in ra màn hình hoặc vẽ trực tiếp lên ảnh.
