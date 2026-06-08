@@ -17,7 +17,10 @@ if __name__ == '__main__':
     
     # Ghi đè đường dẫn nếu người dùng truyền từ dòng lệnh
     if args.raw_annotations:
+        import os
         config.data.RAW_ANNOTATIONS_PATH = args.raw_annotations
+        # Tự động suy luận thư mục chứa ảnh chính là thư mục chứa file JSON (Chuẩn định dạng Roboflow)
+        config.data.PATH_IMAGES_DIR = os.path.dirname(args.raw_annotations)
     if args.mapping_label:
         config.data.TACO_TO_7_CLASSES_MAP = args.mapping_label
 
