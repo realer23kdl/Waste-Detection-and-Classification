@@ -110,9 +110,18 @@ class ClassifierTrainer:
                     
         return train_losses, val_losses
 
+import argparse
+
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Huấn luyện Classifier")
+    parser.add_argument('--data_path', type=str, default="datasets/classifier_data/train", help="Đường dẫn tới dữ liệu")
+    parser.add_argument('--model', type=str, default='efficientnet_b0', choices=['efficientnet_b0', 'resnet50', 'mobilenet_v3'], help="Kiến trúc mạng")
+    parser.add_argument('--epochs', type=int, default=50)
+    parser.add_argument('--batch', type=int, default=32)
+    args = parser.parse_args()
+
     # KHỐI LỆNH THỰC THI CHUẨN RUBRIC (Kế thừa Dataset & Sử dụng DataLoader)
-    print("Khởi tạo Data Pipeline cho Classifier...")
+    print(f"Khởi tạo Data Pipeline cho Classifier với mạng {args.model}...")
     
     # 1. Cấu hình biến đổi ảnh
     transform = transforms.Compose([
@@ -122,24 +131,34 @@ if __name__ == "__main__":
     ])
     
     # 2. Khởi tạo Custom Dataset (Đúng theo yêu cầu "kế thừa lớp Dataset")
-    # Thay đường dẫn này bằng đường dẫn tới thư mục ảnh đã cắt trên Kaggle
-    DATA_DIR = "datasets/classifier_data/train"
+    DATA_DIR = args.data_path
     
     if os.path.exists(DATA_DIR):
         train_dataset = TrashDataset(root_dir=DATA_DIR, transform=transform)
         
         # 3. Tính toán Weighted Loss tự động chống mất cân bằng
         class_weights = train_dataset.get_class_weights()
+        num_classes = len(train_dataset.classes)
         
         # 4. Sử dụng DataLoader trong PyTorch (Yêu cầu Rubric)
-        train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
-        val_loader = DataLoader(train_dataset, batch_size=32, shuffle=False) # Dùng tạm train làm val để test
+        train_loader = DataLoader(train_dataset, batch_size=args.batch, shuffle=True)
+        val_loader = DataLoader(train_dataset, batch_size=args.batch, shuffle=False) # Dùng tạm train làm val để test
         
-        # 5. Khởi tạo Mô hình EfficientNet-B0
-        print("Đang khởi tạo mô hình EfficientNet-B0...")
-        model = models.efficientnet_b0(pretrained=True)
-        model.classifier[1] = nn.Linear(model.classifier[1].in_features, len(train_dataset.classes))
-        
+        # 5. Khởi tạo Mô hình động dựa trên Argparse
+        print(f"Đang khởi tạo mô hình {args.model}...")
+        if args.model == 'resnet50':
+            model = models.resnet50(pretrained=True)
+            num_ftrs = model.fc.in_features
+            model.fc = nn.Linear(num_ftrs, num_classes)
+        elif args.model == 'efficientnet_b0':
+            model = models.efficientnet_b0(pretrained=True)
+            num_ftrs = model.classifier[1].in_features
+            model.classifier[1] = nn.Linear(num_ftrs, num_classes)
+        elif args.model == 'mobilenet_v3':
+            model = models.mobilenet_v3_small(pretrained=True)
+            num_ftrs = model.classifier[3].in_features
+            model.classifier[3] = nn.Linear(num_ftrs, num_classes)
+            
         # 6. Truyền class_weights vào Trainer
         trainer = ClassifierTrainer(
             model=model, 
@@ -150,7 +169,8 @@ if __name__ == "__main__":
         )
         
         # 7. Bắt đầu huấn luyện
-        train_losses, val_losses = trainer.train(num_epochs=50, save_path="weights/best_efficientnet.pth")
+        save_path = f"weights/best_{args.model}.pth"
+        train_losses, val_losses = trainer.train(num_epochs=args.epochs, save_path=save_path)
         
         # ==========================================
         # KHỐI LỆNH ĐÁNH GIÁ (RUBRIC PHẦN 3)
@@ -160,7 +180,7 @@ if __name__ == "__main__":
         
         # 1. Vẽ biểu đồ Loss qua các Epochs
         print("Đang vẽ biểu đồ Loss...")
-        evaluator.plot_loss_curves(train_losses, val_losses, save_path="loss_curve_classifier.png")
+        evaluator.plot_loss_curves(train_losses, val_losses, save_path=f"loss_curve_{args.model}.png")
         
         # 2. Chạy đánh giá trên tập Test (Lấy Val làm Test tạm thời)
         print("Đang chạy dự đoán trên tập kiểm tra để lấy chỉ số F1, Precision, Recall...")
@@ -179,7 +199,7 @@ if __name__ == "__main__":
         evaluator.calculate_metrics(y_true, y_pred)
         
         # 3. Vẽ Ma trận nhầm lẫn
-        evaluator.plot_confusion_matrix(y_true, y_pred, save_path="confusion_matrix_classifier.png")
+        evaluator.plot_confusion_matrix(y_true, y_pred, save_path=f"confusion_matrix_{args.model}.png")
         print("\n[HOÀN TẤT] Quá trình huấn luyện và đánh giá mô hình đã kết thúc.")
         
     else:

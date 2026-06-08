@@ -32,7 +32,7 @@ def create_yaml_if_needed(data_path):
     else:
         raise ValueError("Đường dẫn data không hợp lệ! Phải là thư mục hoặc file .yaml")
 
-def train_yolo_model(data_path: str, epochs: int = 50, batch_size: int = 16, optimizer='auto', lr=0.01):
+def train_yolo_model(data_path: str, model_name: str = 'yolov8m.pt', epochs: int = 50, batch_size: int = 16, optimizer='auto', lr=0.01):
     """
     Code Python huấn luyện YOLOv8.
     """
@@ -41,8 +41,8 @@ def train_yolo_model(data_path: str, epochs: int = 50, batch_size: int = 16, opt
     print("Khởi tạo Weights & Biases để ghi log biểu đồ...")
     wandb.init(project="trashnet-yolo-detection", job_type="training")
     
-    print("Nạp mô hình YOLOv8 Medium (Não to hơn, chuyên trị rác nhỏ)...")
-    model = YOLO('yolov8m.pt')
+    print(f"Nạp mô hình {model_name} (Não to hơn, chuyên trị rác nhỏ)...")
+    model = YOLO(model_name)
     
     print("Bắt đầu huấn luyện...")
     results = model.train(
@@ -92,10 +92,11 @@ def train_yolo_model(data_path: str, epochs: int = 50, batch_size: int = 16, opt
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--data_path', type=str, required=True, help='Đường dẫn tới thư mục data trên Kaggle (VD: /kaggle/input/...) hoặc file data.yaml')
+    parser.add_argument('--model', type=str, default='yolov8m.pt', help='Tên mô hình Ultralytics (VD: yolov8m.pt, yolov9c.pt, yolov8m-rtdetr.pt)')
     parser.add_argument('--epochs', type=int, default=50)
     parser.add_argument('--batch', type=int, default=16)
     parser.add_argument('--optimizer', type=str, default='auto', help='Tối ưu Optimizer (VD: SGD, AdamW)')
     parser.add_argument('--lr', type=float, default=0.01, help='Learning rate')
     
     args = parser.parse_args()
-    train_yolo_model(args.data_path, args.epochs, args.batch, args.optimizer, args.lr)
+    train_yolo_model(args.data_path, args.model, args.epochs, args.batch, args.optimizer, args.lr)
