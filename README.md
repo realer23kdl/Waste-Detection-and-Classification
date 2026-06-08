@@ -11,12 +11,10 @@
 Hệ thống được module hóa cao độ để dễ dàng bảo trì và mở rộng:
 - `src/config/`: Nơi định nghĩa các đường dẫn file (AppConfig, SystemConfig).
 - `src/core/`: Chứa các hệ thống lõi như `LoggerSetup` và `BasePipeline`.
-- `src/data_prep/`: Trái tim xử lý dữ liệu:
-  - `processors/`: Chứa các thuật toán `CategoryMappingProcessor`, `BinarizationProcessor`.
-  - `splitters/`: Chứa thuật toán cắt tập dữ liệu `MultiLabelSplitter`, `SingleLabelSplitter`.
-  - `transforms.py`: Chứa các bộ Augmentations và Resize.
+- `src/data_prep/`: Trái tim xử lý dữ liệu (CategoryMappingProcessor, ImageCropProcessor, YoloFormatProcessor, MultiLabelSplitter...).
+- `src/models/`: Định nghĩa các lõi mô hình Hướng đối tượng (`TrashDetector`, `TrashClassifier`).
 - `src/pipeline/`: Chứa `WastePreprocessingPipeline` dùng để lắp ghép các processors bên trên.
-- `src/trainers/`: Mã nguồn huấn luyện YOLO và Classifier.
+- `src/trainers/`: Mã nguồn huấn luyện YOLO và Classifier (sử dụng triệt để OOP model).
 
 ---
 
@@ -37,6 +35,8 @@ Dùng câu lệnh sau, truyền trực tiếp đường dẫn file gốc vào:
 **Kết quả:** Hệ thống sẽ tự động dọn cỗ sẵn toàn bộ dữ liệu cho cả 2 mô hình (One-Click-To-Rule-Them-All):
 1. **Dữ liệu cho YOLO:** Tự động sinh file `.txt` chuẩn YOLO và gom vào thư mục `datasets/yolo_data/`.
 2. **Dữ liệu cho Classifier:** Tự động cắt các cục rác ra thành ảnh nhỏ và xếp vào `datasets/classifier_data/train/` (Glass, Paper, Plastic...).
+
+*(Nâng cao)*: Kiến trúc này hỗ trợ 100% OOP nên bạn có thể hoàn toàn tách từng `Processor` ra để chạy trong từng Cell riêng biệt trên Notebook Kaggle nếu muốn kiểm soát kỹ luồng dữ liệu!
 
 ### Trường hợp B: Dữ liệu tải về dạng YOLO (từ Roboflow)
 Nếu bạn đã tải dữ liệu qua Roboflow ở dạng YOLO (gồm các file `.txt` và `data.yaml`), Roboflow đã làm hộ phần chia Train/Test.
@@ -82,6 +82,13 @@ Hệ thống cho phép bạn chuyển đổi kiến trúc mạng dễ dàng ch�
 - `--epochs`: Số epoch huấn luyện (mặc định: `50`).
 - `--batch`: Kích thước batch size (mặc định: `32`).
 - `--patience`: Số lượng epoch tối đa chờ Validation Loss không giảm trước khi dừng sớm (mặc định: `5`).
+
+> [!TIP]
+> **ĐÁP ỨNG RUBRIC PHẦN 3 (ĐÁNH GIÁ & PHÂN TÍCH LỖI):** 
+> Ngay sau khi quá trình huấn luyện Classifier kết thúc, hệ thống sẽ **tự động** chạy đánh giá và xuất ra 3 file ảnh cực kỳ quan trọng cho báo cáo của bạn:
+> 1. `loss_curve.png`: Biểu đồ hàm Loss qua các Epochs để chẩn đoán trạng thái mô hình.
+> 2. `confusion_matrix.png`: Ma trận nhầm lẫn tính toán chính xác F1-Score, Precision, Recall.
+> 3. `error_analysis.png`: Lưới trực quan hóa 9 mẫu bị dự đoán sai (thực tế là A nhưng đoán thành B) để phân tích điểm yếu của mô hình.
 
 ---
 
