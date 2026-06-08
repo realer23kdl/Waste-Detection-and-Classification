@@ -49,22 +49,36 @@ Mô hình YOLOv8 Medium đã được tùy chỉnh cấu hình để đáp ứng
 - **Cosine LR Scheduler (cos_lr=True):** Giúp đồ thị hàm Loss hội tụ đẹp.
 
 **Lệnh huấn luyện YOLO/RT-DETR:**
+Sử dụng cờ `--model` để thay đổi qua lại giữa các phiên bản YOLO cực kỳ tiện lợi:
 ```bash
 # Tắt wandb để tránh lỗi hỏi API Key trên Kaggle
 %env WANDB_MODE=disabled
 
 # Khởi động quy trình Train YOLOv8 Medium (Mặc định)
 !python src/trainers/train_yolo.py --data_path /đường/dẫn/đến/file/data.yaml --epochs 150 --batch 16 --patience 25
-
-# Hoặc đổi sang train RT-DETR cực kỳ dễ dàng:
-!python src/trainers/train_yolo.py --data_path /đường/dẫn/đến/file/data.yaml --model yolov8m-rtdetr.pt
 ```
 
+**Các tham số có thể tùy chỉnh qua dòng lệnh (Argparse):**
+- `--data_path`: (Bắt buộc) Đường dẫn tới file `data.yaml` hoặc thư mục chứa data.
+- `--model`: Tên mô hình Ultralytics. **Các model được hỗ trợ:** `yolov8n.pt`, `yolov8s.pt`, `yolov8m.pt` (mặc định), `yolov9c.pt`, `yolov8m-rtdetr.pt` (mô hình Transformer).
+- `--epochs`: Số epoch huấn luyện (mặc định: `50`).
+- `--batch`: Kích thước batch size (mặc định: `16`).
+- `--patience`: Số lượng epoch tối đa chờ mAP không tăng trước khi dừng (mặc định: `25`).
+- `--lr`: Tốc độ học (Learning Rate, mặc định: `0.01`).
+- `--optimizer`: Tối ưu hóa (VD: `SGD`, `AdamW`, mặc định: `auto`).
+
 **Lệnh huấn luyện Classifier:**
-Hỗ trợ chuyển đổi nhanh giữa `efficientnet_b0`, `resnet50`, và `mobilenet_v3`:
+Hệ thống cho phép bạn chuyển đổi kiến trúc mạng dễ dàng chỉ bằng cờ `--model` (Hỗ trợ: `efficientnet_b0`, `resnet50`, `mobilenet_v3`):
 ```bash
 !python src/trainers/train_classifier.py --data_path datasets/classifier_data/train --model resnet50 --epochs 50 --patience 5
 ```
+
+**Các tham số có thể tùy chỉnh qua dòng lệnh (Argparse):**
+- `--data_path`: Đường dẫn tới thư mục ảnh đã cắt rác (Mặc định: `datasets/classifier_data/train`).
+- `--model`: Kiến trúc mạng CNN. **Các model được hỗ trợ:** `efficientnet_b0` (mặc định), `resnet50`, `mobilenet_v3`.
+- `--epochs`: Số epoch huấn luyện (mặc định: `50`).
+- `--batch`: Kích thước batch size (mặc định: `32`).
+- `--patience`: Số lượng epoch tối đa chờ Validation Loss không giảm trước khi dừng sớm (mặc định: `5`).
 
 ---
 
