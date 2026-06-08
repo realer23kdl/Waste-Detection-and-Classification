@@ -32,6 +32,7 @@ Dùng câu lệnh sau, truyền trực tiếp đường dẫn file gốc vào:
 ```bash
 !python main_prep.py --raw_annotations /kaggle/input/.../annotations.json --mapping_label /kaggle/input/.../mapping_label.json
 ```
+*(Bổ sung tùy chỉnh chia Train/Test)*: Bạn có thể thêm `--test_size 0.3` (chia 30% test) hoặc `--random_state 42` để cố định tập chia.
 *Kết quả:* Hệ thống sẽ tự động sinh ra các file `.json` đã được xử lý chuẩn mực.
 
 ### Trường hợp B: Dữ liệu tải về dạng YOLO (từ Roboflow)
@@ -53,7 +54,7 @@ Mô hình YOLOv8 Medium đã được tùy chỉnh cấu hình để đáp ứng
 %env WANDB_MODE=disabled
 
 # Khởi động quy trình Train YOLOv8 Medium (Mặc định)
-!python src/trainers/train_yolo.py --data_path /đường/dẫn/đến/file/data.yaml --epochs 150 --batch 16
+!python src/trainers/train_yolo.py --data_path /đường/dẫn/đến/file/data.yaml --epochs 150 --batch 16 --patience 25
 
 # Hoặc đổi sang train RT-DETR cực kỳ dễ dàng:
 !python src/trainers/train_yolo.py --data_path /đường/dẫn/đến/file/data.yaml --model yolov8m-rtdetr.pt
@@ -62,7 +63,7 @@ Mô hình YOLOv8 Medium đã được tùy chỉnh cấu hình để đáp ứng
 **Lệnh huấn luyện Classifier:**
 Hỗ trợ chuyển đổi nhanh giữa `efficientnet_b0`, `resnet50`, và `mobilenet_v3`:
 ```bash
-!python src/trainers/train_classifier.py --data_path datasets/classifier_data/train --model resnet50 --epochs 50
+!python src/trainers/train_classifier.py --data_path datasets/classifier_data/train --model resnet50 --epochs 50 --patience 5
 ```
 
 ---
