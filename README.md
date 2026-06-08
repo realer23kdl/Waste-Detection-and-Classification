@@ -33,7 +33,10 @@ Dùng câu lệnh sau, truyền trực tiếp đường dẫn file gốc vào:
 !python main_prep.py --raw_annotations /kaggle/input/.../annotations.json --mapping_label /kaggle/input/.../mapping_label.json
 ```
 *(Bổ sung tùy chỉnh chia Train/Test)*: Bạn có thể thêm `--test_size 0.3` (chia 30% test) hoặc `--random_state 42` để cố định tập chia.
-*Kết quả:* Hệ thống sẽ tự động sinh ra các file `.json` đã được xử lý chuẩn mực.
+
+**Kết quả:** Hệ thống sẽ tự động dọn cỗ sẵn toàn bộ dữ liệu cho cả 2 mô hình (One-Click-To-Rule-Them-All):
+1. **Dữ liệu cho YOLO:** Tự động sinh file `.txt` chuẩn YOLO và gom vào thư mục `datasets/yolo_data/`.
+2. **Dữ liệu cho Classifier:** Tự động cắt các cục rác ra thành ảnh nhỏ và xếp vào `datasets/classifier_data/train/` (Glass, Paper, Plastic...).
 
 ### Trường hợp B: Dữ liệu tải về dạng YOLO (từ Roboflow)
 Nếu bạn đã tải dữ liệu qua Roboflow ở dạng YOLO (gồm các file `.txt` và `data.yaml`), Roboflow đã làm hộ phần chia Train/Test.

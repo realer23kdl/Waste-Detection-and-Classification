@@ -11,7 +11,7 @@ import sys
 
 # Thêm đường dẫn gốc để import file dataset.py
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-from src.data_loaders.dataset import TrashDataset
+from src.data_prep.dataset import TrashDataset
 
 def set_seed(seed=42):
     """Cố định Random Seed để có thể tái lập kết quả (Theo đúng Rubric)"""
