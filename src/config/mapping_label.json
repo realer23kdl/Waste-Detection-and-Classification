@@ -1,1 +1,73 @@
-{"Glass": ["glass_bottle", "broken_glass"], "Plastic": ["plastic_bottle", "plastic_bag"], "Paper": ["paper_cup"]}
+{
+  "Glass": [
+    "Glass bottle",
+    "Broken glass",
+    "Glass jar",
+    "Glass cup"
+  ],
+  "Paper": [
+    "Paper cup",
+    "Paper bag",
+    "Normal paper",
+    "Paper straw",
+    "Magazine paper",
+    "Wrapping paper",
+    "Tissues"
+  ],
+  "Cardboard": [
+    "Other carton",
+    "Drink carton",
+    "Corrugated carton",
+    "Meal carton",
+    "Egg carton",
+    "Toilet tube",
+    "Pizza box"
+  ],
+  "Plastic": [
+    "Plastic straw",
+    "Plastic lid",
+    "Plastic film",
+    "Polypropylene bag",
+    "Clear plastic bottle",
+    "Disposable plastic cup",
+    "Other plastic",
+    "Other plastic bottle",
+    "Other plastic container",
+    "Other plastic cup",
+    "Other plastic wrapper",
+    "Plastic bottle cap",
+    "Plastic glooves",
+    "Plastic utensils",
+    "Single-use carrier bag",
+    "Six pack rings"
+  ],
+  "Metal": [
+    "Drink can",
+    "Pop tab",
+    "Food Can",
+    "Aerosol",
+    "Aluminium foil",
+    "Metal lid",
+    "Scrap metal",
+    "Aluminium blister pack",
+    "Metal bottle cap"
+  ],
+  "Trash": [
+    "Cigarette",
+    "Battery",
+    "Shoe",
+    "Garbage bag",
+    "Styrofoam piece",
+    "Food waste",
+    "Crisp packet",
+    "Squeezable tube",
+    "Spread tub",
+    "Foam cup",
+    "Tupperware",
+    "Carded blister pack",
+    "Disposable food container",
+    "Foam food container",
+    "Rope & strings",
+    "Unlabeled litter"
+  ]
+}
