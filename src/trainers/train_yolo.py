@@ -32,7 +32,7 @@ def create_yaml_if_needed(data_path):
     else:
         raise ValueError("Đường dẫn data không hợp lệ! Phải là thư mục hoặc file .yaml")
 
-def train_yolo_model(data_path: str, model_name: str = 'yolov8m.pt', epochs: int = 50, batch_size: int = 16, optimizer='auto', lr=0.01):
+def train_yolo_model(data_path: str, model_name: str = 'yolov8m.pt', epochs: int = 50, batch_size: int = 16, patience: int = 25, optimizer='auto', lr=0.01):
     """
     Code Python huấn luyện YOLOv8.
     """
@@ -58,7 +58,7 @@ def train_yolo_model(data_path: str, model_name: str = 'yolov8m.pt', epochs: int
         # --- BỔ SUNG CÁC TIÊU CHÍ RUBRIC (CHECKPOINT, EARLY STOPPING, LR SCHEDULER) ---
         
         # 1. Early Stopping (Dừng sớm tránh Overfitting)
-        patience=25,       # Dừng huấn luyện nếu mAP không tăng sau 25 epochs
+        patience=patience,       # Dừng huấn luyện nếu mAP không tăng sau n epochs
         
         # 2. Checkpointing (Lưu trọng số tự động)
         save=True,         # Tự động lưu best.pt và last.pt
@@ -95,8 +95,9 @@ if __name__ == "__main__":
     parser.add_argument('--model', type=str, default='yolov8m.pt', help='Tên mô hình Ultralytics (VD: yolov8m.pt, yolov9c.pt, yolov8m-rtdetr.pt)')
     parser.add_argument('--epochs', type=int, default=50)
     parser.add_argument('--batch', type=int, default=16)
+    parser.add_argument('--patience', type=int, default=25, help='Early Stopping patience')
     parser.add_argument('--optimizer', type=str, default='auto', help='Tối ưu Optimizer (VD: SGD, AdamW)')
     parser.add_argument('--lr', type=float, default=0.01, help='Learning rate')
     
     args = parser.parse_args()
-    train_yolo_model(args.data_path, args.model, args.epochs, args.batch, args.optimizer, args.lr)
+    train_yolo_model(args.data_path, args.model, args.epochs, args.batch, args.patience, args.optimizer, args.lr)

@@ -118,6 +118,7 @@ if __name__ == "__main__":
     parser.add_argument('--model', type=str, default='efficientnet_b0', choices=['efficientnet_b0', 'resnet50', 'mobilenet_v3'], help="Kiến trúc mạng")
     parser.add_argument('--epochs', type=int, default=50)
     parser.add_argument('--batch', type=int, default=32)
+    parser.add_argument('--patience', type=int, default=5, help="Early stopping patience")
     args = parser.parse_args()
 
     # KHỐI LỆNH THỰC THI CHUẨN RUBRIC (Kế thừa Dataset & Sử dụng DataLoader)
@@ -165,6 +166,7 @@ if __name__ == "__main__":
             train_loader=train_loader, 
             val_loader=val_loader, 
             device='cuda' if torch.cuda.is_available() else 'cpu',
+            patience=args.patience,
             class_weights=class_weights
         )
         

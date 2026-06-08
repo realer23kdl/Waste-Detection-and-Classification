@@ -9,6 +9,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Chạy Pipeline Tiền xử lý dữ liệu")
     parser.add_argument('--raw_annotations', type=str, default=None, help="Đường dẫn tới file raw annotations.json trên Kaggle")
     parser.add_argument('--mapping_label', type=str, default=None, help="Đường dẫn tới file mapping_label.json trên Kaggle")
+    parser.add_argument('--test_size', type=float, default=0.2, help="Tỷ lệ tập Test (VD: 0.2 = 20%)")
+    parser.add_argument('--random_state', type=int, default=2020, help="Random seed để chia data")
     args = parser.parse_args()
 
     config = AppConfig()
@@ -24,7 +26,7 @@ if __name__ == '__main__':
     try:
         logging.info("BẮT ĐẦU CHẠY PIPELINE CHUẨN BỊ DỮ LIỆU...")
         data_pipeline = WastePreprocessingPipeline(config=config.data)
-        data_pipeline.execute()
+        data_pipeline.execute(test_size=args.test_size, random_state=args.random_state)
         logging.info("✅ Đã hoàn thành toàn bộ Pipeline!")
     except Exception as e:
         logging.exception(f"Pipeline sập do lỗi: {e}")

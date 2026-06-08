@@ -11,7 +11,7 @@ class WastePreprocessingPipeline(BasePipeline):
     def __init__(self, config):
         self.config = config
 
-    def execute(self):
+    def execute(self, test_size=0.2, random_state=2020):
         logger.info("--- GIAI ĐOẠN TIỀN XỬ LÝ TĨNH (XỬ LÝ RAW ANNS) ---")
         
         # Bước 1
@@ -25,7 +25,7 @@ class WastePreprocessingPipeline(BasePipeline):
         IOUtils.save_coco_json(self.config.PATH_7_CLASSES, dataset_7_classes)
         
         # Bước 3
-        splitter = MultiLabelSplitter(test_size=0.2, random_state=2020)
+        splitter = MultiLabelSplitter(test_size=test_size, random_state=random_state)
         train_7_classes, test_7_classes = splitter.split(dataset_7_classes)
         IOUtils.save_coco_json(self.config.PATH_MULTI_TRAIN, train_7_classes)
         IOUtils.save_coco_json(self.config.PATH_MULTI_TEST, test_7_classes)
