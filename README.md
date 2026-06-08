@@ -93,3 +93,16 @@ Sau khi huấn luyện xong cả Khối Định vị (YOLO) và Khối Phân lo�
     --image test_image.jpg
 ```
 **Ý nghĩa:** File này sẽ gọi YOLO ra khoanh vùng rác trong bức ảnh `test_image.jpg`, sau đó cắt (crop) từng cục rác ra và ném cho mạng ResNet50 để xác định chính xác nó là rác gì. Kết quả cuối cùng sẽ được in ra màn hình hoặc vẽ trực tiếp lên ảnh.
+
+---
+
+## 5. Phân tích Lỗi và Explainable AI (XAI)
+
+Để đạt điểm tối đa (Rubric mảng Đánh giá & XAI), hệ thống cung cấp công cụ tự động soi Bản đồ nhiệt (Grad-CAM) để xem não bộ của AI đang "nhìn" vào đặc trưng nào của cục rác để dự đoán, đồng thời vẽ biểu đồ so sánh lỗi khoanh vùng của YOLO:
+
+```bash
+!python main_error_analysis.py --image test_image.jpg --detector runs/detect/yolov8m_trashnet/weights/best.pt --classifier efficientnet_b0
+```
+**Kết quả:**
+- File `test_error_analysis_detection.png`: Trực quan hóa độ lệch của Bounding Box.
+- File `test_heatmap_gradcam.png`: Bản đồ nhiệt đỏ/xanh soi chiếu vào điểm đặc trưng của rác (Ví dụ: nếp gấp của túi nilon, cạnh của chai nhựa).
