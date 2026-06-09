@@ -20,6 +20,7 @@ class DataConfig:
     # Đầu ra cho mô hình
     PATH_YOLO_BASE: str = './datasets/yolo_data'
     PATH_CLASSIFIER_TRAIN: str = './datasets/classifier_data/train'
+    PATH_CLASSIFIER_TEST: str = './datasets/classifier_data/test'
 
 @dataclass
 class AppConfig:

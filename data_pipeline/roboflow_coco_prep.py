@@ -20,7 +20,7 @@ def process_roboflow_coco(dataset_dir: str, mapping_label_path: str = None):
         mapping_dict = IOUtils.load_json(mapping_label_path)
         print("Đã nạp file mapping_label.json")
     
-    config = AppConfig()
+    config = AppConfig().data
     
     for split in splits:
         split_dir = os.path.join(dataset_dir, split)
