@@ -3,8 +3,6 @@ import yaml
 import os
 import sys
 from ultralytics import YOLO
-import wandb
-
 # Thêm đường dẫn gốc để import file detector.py
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from src.models.detector import TrashDetector
@@ -43,9 +41,7 @@ def train_yolo_model(data_path: str, model_name: str = 'yolov8m.pt', epochs: int
     """
     yaml_path = create_yaml_if_needed(data_path)
     
-    print("Khởi tạo Weights & Biases để ghi log biểu đồ...")
-    wandb.init(project="trashnet-yolo-detection", job_type="training")
-    
+    print("Sử dụng TensorBoard mặc định của YOLO để ghi log biểu đồ...")    
     print(f"Nạp mô hình {model_name} thông qua OOP TrashDetector...")
     detector = TrashDetector(model_path=model_name, model_type='yolo' if 'yolo' in model_name else 'rtdetr')
     
@@ -59,8 +55,6 @@ def train_yolo_model(data_path: str, model_name: str = 'yolov8m.pt', epochs: int
     )
     
     print(f"Huấn luyện hoàn tất! Trọng số tốt nhất được lưu tại: runs/detect/yolov8s_trashnet/weights/best.pt")
-    wandb.finish()
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--data_path', type=str, required=True, help='Đường dẫn tới thư mục data trên Kaggle (VD: /kaggle/input/...) hoặc file data.yaml')

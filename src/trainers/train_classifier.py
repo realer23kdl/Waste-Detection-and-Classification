@@ -8,7 +8,7 @@ import numpy as np
 import random
 import os
 import sys
-import wandb
+from torch.utils.tensorboard import SummaryWriter
 
 # Thêm đường dẫn gốc để import file dataset.py
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -31,19 +31,17 @@ class ClassifierTrainer:
     Vòng lặp huấn luyện (Training Loop) chuyên nghiệp cho PyTorch.
     Bao gồm: Forward, Backward, Scheduler, Early Stopping, Checkpointing, và Weighted Loss.
     """
-    def __init__(self, model, train_loader, val_loader, device='cuda', patience=5, class_weights=None, learning_rate=0.001, use_wandb=False):
+    def __init__(self, model, train_loader, val_loader, device='cuda', patience=5, class_weights=None, learning_rate=0.001, use_tensorboard=False):
         set_seed(42)
         
         self.model = model.to(device)
         self.train_loader = train_loader
         self.val_loader = val_loader
         self.device = device
-        self.use_wandb = use_wandb
-        
-        self.model = model.to(device)
-        self.train_loader = train_loader
-        self.val_loader = val_loader
-        self.device = device
+        self.use_tensorboard = use_tensorboard
+        if self.use_tensorboard:
+            self.writer = SummaryWriter(log_dir="runs/classifier")
+            print("[Trainer] Đã khởi tạo TensorBoard tại thư mục runs/classifier")
         
         # Hàm Loss (Áp dụng Weighted Loss nếu có Class Imbalance)
         if class_weights is not None:
@@ -101,13 +99,10 @@ class ClassifierTrainer:
             
             print(f"Epoch {epoch+1}/{num_epochs} - Train Loss: {train_loss:.4f} - Val Loss: {val_loss:.4f}")
             
-            if self.use_wandb:
-                wandb.log({
-                    "Train Loss": train_loss,
-                    "Val Loss": val_loss,
-                    "Learning Rate": self.optimizer.param_groups[0]['lr'],
-                    "Epoch": epoch + 1
-                })
+            if self.use_tensorboard:
+                self.writer.add_scalar("Loss/Train", train_loss, epoch)
+                self.writer.add_scalar("Loss/Validation", val_loss, epoch)
+                self.writer.add_scalar("Learning Rate", self.optimizer.param_groups[0]['lr'], epoch)
             
             self.scheduler.step(val_loss)
             
@@ -124,6 +119,9 @@ class ClassifierTrainer:
                     print(f"\n[Early Stopping] Đã dừng sớm ở Epoch {epoch+1} vì Val Loss không giảm nữa.")
                     break
                     
+        if self.use_tensorboard:
+            self.writer.close()
+            
         return train_losses, val_losses
 
 import argparse
@@ -137,11 +135,8 @@ if __name__ == "__main__":
     parser.add_argument('--learning_rate', type=float, default=0.001, help="Tốc độ học")
     parser.add_argument('--dropout', type=float, default=0.3, help="Tỷ lệ Dropout")
     parser.add_argument('--patience', type=int, default=5, help="Early stopping patience")
-    parser.add_argument('--use_wandb', action='store_true', help="Bật log Weights & Biases")
+    parser.add_argument('--use_tensorboard', action='store_true', help="Bật log TensorBoard")
     args = parser.parse_args()
-
-    if args.use_wandb:
-        wandb.init(project="trashnet-classifier", config=vars(args))
 
     # KHỐI LỆNH THỰC THI CHUẨN RUBRIC (Kế thừa Dataset & Sử dụng DataLoader)
     print(f"Khởi tạo Data Pipeline cho Classifier với mạng {args.model}...")
@@ -183,7 +178,7 @@ if __name__ == "__main__":
             patience=args.patience,
             class_weights=class_weights,
             learning_rate=args.learning_rate,
-            use_wandb=args.use_wandb
+            use_tensorboard=args.use_tensorboard
         )
         
         # 7. Bắt đầu huấn luyện
@@ -224,9 +219,6 @@ if __name__ == "__main__":
         evaluator.plot_wrong_predictions(train_dataset, y_true, y_pred, num_samples=9, save_path=f"error_analysis_{args.model}.png")
         
         print("\n[HOÀN TẤT] Quá trình huấn luyện và đánh giá mô hình đã kết thúc.")
-        
-        if args.use_wandb:
-            wandb.finish()
         
     else:
         print(f"Không tìm thấy thư mục dữ liệu: {DATA_DIR}")

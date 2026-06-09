@@ -14,7 +14,7 @@ Chạy lệnh sau tại thư mục gốc của project:
 pip install -r requirements.txt
 ```
 
-*Các thư viện chính bao gồm: `torch`, `torchvision`, `ultralytics` (YOLO), `wandb`, `grad-cam`, `scikit-learn`...*
+*Các thư viện chính bao gồm: `torch`, `torchvision`, `ultralytics` (YOLO), `tensorboard`, `grad-cam`, `scikit-learn`...*
 
 ---
 
@@ -59,10 +59,7 @@ Hệ thống bao gồm 2 mô hình huấn luyện độc lập: Định vị (YO
 #### 2.1 Huấn luyện Khối Định vị (YOLOv8)
 Sử dụng cờ `--model` để thay đổi qua lại giữa các phiên bản YOLO:
 ```bash
-# Tắt wandb để tránh lỗi API Key trên Kaggle nếu không muốn dùng
-export WANDB_MODE=disabled
-
-# Chạy huấn luyện (Mặc định YOLOv8 Medium)
+# Chạy huấn luyện (Mặc định YOLOv8 Medium, tự động vẽ biểu đồ TensorBoard)
 python src/trainers/train_yolo.py --data_path /đường_dẫn/data.yaml --epochs 150 --batch 16 --patience 25
 ```
 *(Hỗ trợ các models: `yolov8n.pt`, `yolov8s.pt`, `yolov8m.pt`, `yolov9c.pt`, `yolov8m-rtdetr.pt`)*
@@ -75,8 +72,14 @@ Bạn có thể thay đổi Động các tham số Learning Rate, Dropout, Model
 # Lệnh huấn luyện tiêu chuẩn
 python src/trainers/train_classifier.py --data_path datasets/classifier_data/train --model resnet50 --epochs 50 --batch 32
 
-# Lệnh chạy Thực nghiệm Ablation Study (Thay đổi LR và Dropout) kèm Weights & Biases
-python src/trainers/train_classifier.py --model efficientnet_b0 --learning_rate 0.0001 --dropout 0.5 --use_wandb
+# Lệnh chạy Thực nghiệm Ablation Study (Thay đổi LR và Dropout) kèm TensorBoard
+python src/trainers/train_classifier.py --model efficientnet_b0 --learning_rate 0.0001 --dropout 0.5 --use_tensorboard
+
+# Xem biểu đồ ngay trên Kaggle/Colab:
+# Mở một Ô Cell mới và chạy 2 lệnh sau:
+# %load_ext tensorboard
+# %tensorboard --logdir runs
+
 ```
 
 ---
