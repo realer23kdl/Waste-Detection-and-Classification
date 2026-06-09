@@ -5,6 +5,8 @@ import numpy as np
 import sys
 import os
 
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from src.models.detector import TrashDetector
 from src.models.classifier import TrashClassifier
 from src.utils.cropper import ImageCropper

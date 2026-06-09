@@ -19,14 +19,34 @@ pip install -r requirements.txt
 ---
 
 ## 2. Kiến trúc thư mục (OOP Pipeline)
-Hệ thống được module hóa cao độ để dễ dàng bảo trì và mở rộng:
-- `src/config/`: Định nghĩa các đường dẫn file (AppConfig).
-- `src/core/`: Chứa các hệ thống lõi như Logger và BasePipeline.
-- `src/data_prep/`: Trái tim xử lý dữ liệu chuẩn OOP (Dataset, Transforms, Splitters, Processors).
-- `src/models/`: Định nghĩa các lõi mô hình Hướng đối tượng (`TrashDetector`, `TrashClassifier`).
-- `src/pipeline/`: Chứa các luồng thực thi tổng hợp như `TACOPipeline`, `InferencePipeline`.
-- `src/trainers/`: Mã nguồn huấn luyện YOLO và Classifier (có tích hợp Ablation Study CLI).
-- `src/utils/`: Các công cụ trực quan hóa (Visualizer, Metrics, Grad-CAM).
+Hệ thống được chia làm 3 Khối chuẩn mực: Khối Dữ liệu, Khối Lõi Thuật toán và Khối Đánh giá.
+
+```text
+our_pipeline/
+├── data_pipeline/               <- Khối 1: Công cụ Tiền xử lý Dữ liệu (Đầu vào)
+│   ├── main_prep.py             <- Script chuẩn bị dữ liệu từ bộ COCO JSON gốc.
+│   ├── roboflow_coco_prep.py    <- Script chuyên biệt xử lý dữ liệu COCO tải từ nền tảng Roboflow.
+│   └── crop_from_yolo.py        <- Script tự động cắt rác (crop) dựa trên nhãn YOLO có sẵn.
+│
+├── src/                         <- Khối 2: Lõi Thuật toán & Core (Bộ não OOP)
+│   ├── config/                  <- Định nghĩa các đường dẫn file (AppConfig).
+│   ├── core/                    <- Chứa các hệ thống lõi như Logger và BasePipeline.
+│   ├── data_prep/               <- Lõi xử lý dữ liệu chuẩn OOP (Dataset, Transforms, Splitters, Processors).
+│   ├── models/                  <- Định nghĩa các lõi mô hình Hướng đối tượng (TrashDetector, TrashClassifier).
+│   ├── pipeline/                <- Chứa các luồng thực thi tổng hợp như TACOPipeline, InferencePipeline.
+│   ├── trainers/                <- Lõi mã nguồn huấn luyện YOLO và Classifier.
+│   └── utils/                   <- Các công cụ trực quan hóa (Visualizer, Metrics, Grad-CAM).
+│
+├── evaluation/                  <- Khối 3: Công cụ Đánh giá & Triển khai (Đầu ra)
+│   ├── run_inference.py         <- Kịch bản chạy thực tế: Đưa ảnh vào dự đoán toàn bộ quy trình.
+│   ├── ablation_comparison.py   <- Thực nghiệm So sánh hiệu quả giữa việc Có cắt rác (Crop) và Không cắt rác.
+│   ├── error_analysis.py        <- Chạy AI Giải thích (XAI - Grad-CAM) để phân tích lý do dự đoán sai.
+│   ├── demo_team.py             <- Kịch bản demo ngắn ngọn về DataLoader, Early Stopping, LR Scheduler.
+│   └── test_local.py            <- Kịch bản nháp (sandbox) để test các hàm nhỏ cục bộ.
+│
+├── README.md                    <- "Trang bìa" của dự án, giải thích tổng quan và hướng dẫn sử dụng.
+└── requirements.txt             <- Danh sách các thư viện mã nguồn mở cần cài đặt.
+```
 
 ---
 
@@ -41,7 +61,7 @@ Tùy thuộc vào định dạng dữ liệu bạn tải về, chọn 1 trong 2 
 **Trường hợp A: Dữ liệu tải về dạng Raw COCO JSON**
 Nếu dùng file `annotations.json` thô, bạn cần chạy luồng tiền xử lý (Gom nhãn, binarization, cắt rác):
 ```bash
-python main_prep.py --raw_annotations /đường_dẫn/annotations.json --mapping_label /đường_dẫn/mapping_label.json
+python data_pipeline/main_prep.py --raw_annotations /đường_dẫn/annotations.json --mapping_label /đường_dẫn/mapping_label.json
 ```
 *Kết quả:* Hệ thống tự động sinh ra 2 tập dữ liệu riêng biệt:
 1. File `.txt` chuẩn cho YOLO lưu tại `datasets/yolo_data/`.
@@ -110,7 +130,7 @@ python src/trainers/test_classifier.py --data_path datasets/classifier_data/test
 Sau khi huấn luyện xong cả 2 mô hình, bạn có thể chạy luồng Inference tổng hợp 2 giai đoạn (Detect -> Crop -> Classify) cho một bức ảnh bất kỳ:
 
 ```bash
-python main_inference.py \
+python evaluation/run_inference.py \
     --pipeline detect_and_classify \
     --detector runs/detect/yolov8m_trashnet/weights/best.pt \
     --classifier resnet50 \
@@ -125,7 +145,7 @@ python main_inference.py \
 Để so sánh trực quan hiệu quả của việc **Có cắt rác (Detect -> Crop -> Classify)** so với việc **Truyền thẳng ảnh gốc (Classify Only)**, bạn hãy chạy lệnh sau:
 
 ```bash
-python main_ablation_comparison.py \
+python evaluation/ablation_comparison.py \
     --image test_image.jpg \
     --detector runs/detect/yolov8m_trashnet/weights/best.pt \
     --classifier resnet50
@@ -139,7 +159,7 @@ python main_ablation_comparison.py \
 Để giải thích được lý do vì sao AI lại phân loại sai, hãy dùng lệnh sau để soi "Bản đồ nhiệt":
 
 ```bash
-python main_error_analysis.py \
+python evaluation/error_analysis.py \
     --image test_image.jpg \
     --detector runs/detect/yolov8m_trashnet/weights/best.pt \
     --classifier efficientnet_b0

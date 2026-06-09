@@ -5,12 +5,13 @@ import os
 import sys
 
 # Thêm đường dẫn src để import
-sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from pipeline.infer import DetectAndClassifyPipeline
-from utils.visualizer import Visualizer
-from utils.grad_cam_explainer import ErrorAnalyzer
+from src.pipeline.infer import DetectAndClassifyPipeline
+from src.utils.visualizer import Visualizer
+from src.utils.grad_cam_explainer import ErrorAnalyzer
 from torchvision import transforms
+from src.config.app_config import AppConfigs
 
 def download_image(url, save_path):
     print(f"Đang tải ảnh thử nghiệm từ Internet...")

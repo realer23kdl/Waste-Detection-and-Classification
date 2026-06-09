@@ -1,7 +1,7 @@
 import os
 import sys
 
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from src.utils.io_utils import IOUtils
 from src.data_prep.processors.category_mapping import CategoryMappingProcessor
 from src.data_prep.processors.binarization import BinarizationProcessor

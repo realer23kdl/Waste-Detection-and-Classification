@@ -1,7 +1,12 @@
 import os
+import sys
 import json
 import cv2
 import numpy as np
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+import torch
 
 # Tạo thư mục dummy
 os.makedirs("datasets/raw/images", exist_ok=True)

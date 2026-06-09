@@ -1,8 +1,11 @@
 import os
+import sys
 import cv2
 import yaml
 import glob
 import argparse
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 def crop_yolo_dataset(yolo_dir, output_dir):
     """

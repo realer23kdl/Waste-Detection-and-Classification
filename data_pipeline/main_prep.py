@@ -1,3 +1,8 @@
+import os
+import sys
+# Sửa lại đường dẫn gốc do file đã bị lùi sâu 1 cấp vào trong data_pipeline/
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import logging
 from src.config.app_config import AppConfig
 from src.core.logger import LoggerSetup

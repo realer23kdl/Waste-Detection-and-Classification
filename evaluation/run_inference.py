@@ -1,6 +1,10 @@
 import argparse
+import sys
+import os
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from src.pipeline.infer import DetectAndClassifyPipeline
-# (Người 1 và 3 sẽ import class của họ ở đây sau)
 
 def main():
     parser = argparse.ArgumentParser(description="Hệ thống Nhận diện và Phân loại Rác thải")
