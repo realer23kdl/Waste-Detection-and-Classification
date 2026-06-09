@@ -57,7 +57,7 @@ def main():
     print("BÁO CÁO PHÂN LOẠI (CLASSIFICATION REPORT)")
     print("="*50)
     target_names = [k for k, v in sorted(test_dataset.class_to_idx.items(), key=lambda item: item[1])]
-    print(classification_report(all_labels, all_preds, target_names=target_names, zero_division=0))
+    print(classification_report(all_labels, all_preds, labels=range(len(target_names)), target_names=target_names, zero_division=0))
 
 if __name__ == "__main__":
     main()
