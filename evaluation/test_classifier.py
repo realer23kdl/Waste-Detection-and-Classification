@@ -4,6 +4,7 @@ import os
 import torch
 from torch.utils.data import DataLoader
 from sklearn.metrics import classification_report
+from torchvision import transforms
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from src.data_prep.dataset import TrashDataset
@@ -17,7 +18,12 @@ def main():
     args = parser.parse_args()
 
     print(f"Đang nạp tập dữ liệu từ {args.data_path}")
-    test_dataset = TrashDataset(data_dir=args.data_path, is_train=False)
+    transform = transforms.Compose([
+        transforms.Resize((224, 224)),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+    ])
+    test_dataset = TrashDataset(root_dir=args.data_path, transform=transform)
     test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False)
 
     print(f"Khởi tạo mô hình {args.model}...")
