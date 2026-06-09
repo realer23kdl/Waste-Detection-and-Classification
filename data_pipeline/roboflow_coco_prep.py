@@ -74,6 +74,7 @@ def process_roboflow_coco(dataset_dir: str, mapping_label_path: str = None):
         
     # 6. Sinh file data.yaml cho YOLO
     yaml_path = os.path.join(config.PATH_YOLO_BASE, 'data.yaml')
+    os.makedirs(os.path.dirname(yaml_path), exist_ok=True)
     with open(yaml_path, 'w', encoding='utf-8') as f:
         f.write(f"train: train/images\n")
         f.write(f"val: val/images\n")
