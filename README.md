@@ -108,7 +108,21 @@ python main_inference.py \
 
 ---
 
-## 5. Explainable AI (XAI) bằng Grad-CAM
+## 5. Ablation Study: Đánh giá Tầm quan trọng của Cắt rác (Crop)
+
+Để so sánh trực quan hiệu quả của việc **Có cắt rác (Detect -> Crop -> Classify)** so với việc **Truyền thẳng ảnh gốc (Classify Only)**, bạn hãy chạy lệnh sau:
+
+```bash
+python main_ablation_comparison.py \
+    --image test_image.jpg \
+    --detector runs/detect/yolov8m_trashnet/weights/best.pt \
+    --classifier resnet50
+```
+*Kết quả:* Trả về file ảnh `ablation_comparison_result.png` chia làm 2 nửa màn hình. Nửa trái là kết quả sai lệch khi Classifier bị nhiễu bởi hậu cảnh. Nửa phải là kết quả chính xác khi YOLO đã loại bỏ hậu cảnh và chỉ cắt đúng cục rác. Bức ảnh này **cực kỳ đắt giá** để đưa vào báo cáo!
+
+---
+
+## 6. Explainable AI (XAI) bằng Grad-CAM
 
 Để giải thích được lý do vì sao AI lại phân loại sai, hãy dùng lệnh sau để soi "Bản đồ nhiệt":
 

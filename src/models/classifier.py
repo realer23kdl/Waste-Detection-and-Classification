@@ -59,7 +59,7 @@ class TrashClassifier:
         # Ánh xạ ID ra tên chữ (Ví dụ)
         self.class_names = ["Thủy tinh", "Giấy", "Bìa cứng", "Nhựa", "Kim loại", "Rác hỗn hợp"]
 
-    def predict(self, cropped_images: List[np.ndarray]) -> List[str]:
+    def predict(self, cropped_images: List[np.ndarray], return_prob: bool = False):
         """
         Dự đoán danh sách ảnh mini.
         
@@ -81,7 +81,13 @@ class TrashClassifier:
                 
             # Lấy vị trí có xác suất cao nhất
             _, predicted_idx = torch.max(output, 1)
+            probabilities = torch.nn.functional.softmax(output, dim=1)
+            prob = probabilities[0][predicted_idx.item()].item()
             predicted_class = self.class_names[predicted_idx.item()]
-            results.append(predicted_class)
+            
+            if return_prob:
+                results.append((predicted_class, prob))
+            else:
+                results.append(predicted_class)
             
         return results
