@@ -1,0 +1,56 @@
+import argparse
+import sys
+import os
+import torch
+from torch.utils.data import DataLoader
+from sklearn.metrics import classification_report
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from src.data_prep.dataset import TrashDataset
+from src.models.classifier import TrashClassifier
+
+def main():
+    parser = argparse.ArgumentParser(description="Đánh giá mô hình Classifier")
+    parser.add_argument('--weights', type=str, required=True, help="Đường dẫn file weights (.pth)")
+    parser.add_argument('--data_path', type=str, required=True, help="Thư mục chứa ảnh test")
+    parser.add_argument('--model', type=str, default='resnet50', help="Tên model")
+    args = parser.parse_args()
+
+    print(f"Đang nạp tập dữ liệu từ {args.data_path}")
+    test_dataset = TrashDataset(data_dir=args.data_path, is_train=False)
+    test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False)
+
+    print(f"Khởi tạo mô hình {args.model}...")
+    num_classes = len(test_dataset.classes)
+    
+    model_wrapper = TrashClassifier(model_name=args.model, num_classes=num_classes)
+    model = model_wrapper.model
+    
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    model.load_state_dict(torch.load(args.weights, map_location=device))
+    model.to(device)
+    model.eval()
+
+    all_preds = []
+    all_labels = []
+
+    print("Đang tiến hành đánh giá trên tập test...")
+    with torch.no_grad():
+        for images, labels in test_loader:
+            images = images.to(device)
+            labels = labels.to(device)
+            
+            outputs = model(images)
+            _, preds = torch.max(outputs, 1)
+            
+            all_preds.extend(preds.cpu().numpy())
+            all_labels.extend(labels.cpu().numpy())
+
+    print("\n" + "="*50)
+    print("BÁO CÁO PHÂN LOẠI (CLASSIFICATION REPORT)")
+    print("="*50)
+    target_names = [k for k, v in sorted(test_dataset.class_to_idx.items(), key=lambda item: item[1])]
+    print(classification_report(all_labels, all_preds, target_names=target_names, zero_division=0))
+
+if __name__ == "__main__":
+    main()
