@@ -185,38 +185,7 @@ if __name__ == "__main__":
         save_path = f"weights/best_{args.model}.pth"
         train_losses, val_losses = trainer.train(num_epochs=args.epochs, save_path=save_path)
         
-        # ==========================================
-        # KHỐI LỆNH ĐÁNH GIÁ (RUBRIC PHẦN 3)
-        # ==========================================
-        from src.utils.metrics import Evaluator
-        evaluator = Evaluator(class_names=train_dataset.classes)
-        
-        # 1. Vẽ biểu đồ Loss qua các Epochs
-        print("Đang vẽ biểu đồ Loss...")
-        evaluator.plot_loss_curves(train_losses, val_losses, save_path=f"loss_curve_{args.model}.png")
-        
-        # 2. Chạy đánh giá trên tập Test (Lấy Val làm Test tạm thời)
-        print("Đang chạy dự đoán trên tập kiểm tra để lấy chỉ số F1, Precision, Recall...")
-        trainer.model.eval()
-        y_true, y_pred = [], []
-        with torch.no_grad():
-            for inputs, labels in val_loader:
-                inputs = inputs.to(trainer.device)
-                outputs = trainer.model(inputs)
-                _, preds = torch.max(outputs, 1)
-                
-                y_true.extend(labels.cpu().numpy())
-                y_pred.extend(preds.cpu().numpy())
-                
-        # In ra các chỉ số vàng (Accuracy, Precision, Recall, F1)
-        evaluator.calculate_metrics(y_true, y_pred)
-        
-        # 3. Vẽ Ma trận nhầm lẫn
-        evaluator.plot_confusion_matrix(y_true, y_pred, save_path=f"confusion_matrix_{args.model}.png")
-        
-        # 4. Trực quan hóa ảnh phân loại sai (Rubric: Error Analysis)
-        print("Đang trích xuất và trực quan hóa các mẫu dự đoán sai...")
-        evaluator.plot_wrong_predictions(train_dataset, y_true, y_pred, num_samples=9, save_path=f"error_analysis_{args.model}.png")
+        print(f"\n[HOÀN TẤT] Quá trình huấn luyện mô hình đã kết thúc. Trọng số được lưu tại: {save_path}")
         
         print("\n[HOÀN TẤT] Quá trình huấn luyện và đánh giá mô hình đã kết thúc.")
         

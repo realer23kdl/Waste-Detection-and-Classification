@@ -84,12 +84,24 @@ python src/trainers/train_classifier.py --model efficientnet_b0 --learning_rate 
 
 ---
 
-### BƯỚC 3: Đánh giá và Phân tích Lỗi tự động (Rubric Phần 3)
+### BƯỚC 3: Đánh giá Độc lập (Chạy Test tách biệt)
 
-Ngay sau khi quá trình huấn luyện Classifier kết thúc ở **BƯỚC 2**, hệ thống sẽ **tự động** chạy đánh giá và xuất ra 3 file ảnh quan trọng:
-1. `loss_curve.png`: Biểu đồ hàm Loss qua các Epochs.
-2. `confusion_matrix.png`: Ma trận nhầm lẫn tính toán chính xác F1-Score, Precision, Recall.
-3. `error_analysis.png`: Trực quan hóa các mẫu bị dự đoán sai (thực tế là A nhưng đoán thành B) để phân tích điểm yếu của mô hình.
+Thay vì Đánh giá tự động ngay sau khi Train, bạn có thể chạy riêng các tập lệnh Test sau khi đã có file trọng số tốt nhất (`best.pt` hoặc `best_resnet50.pth`):
+
+#### 3.1 Chấm điểm Mô hình Định vị (YOLO)
+```bash
+python src/trainers/test_yolo.py --data_path /đường_dẫn/data.yaml --weights runs/detect/yolov8m_trashnet/weights/best.pt
+```
+*Kết quả:* Tính toán ra các chỉ số mAP50, mAP50-95 và lưu biểu đồ vào thư mục `runs/detect/val/`.
+
+#### 3.2 Chấm điểm Mô hình Phân loại (CNN)
+Hệ thống sẽ lấy file trọng số tải lên mạng phân loại và chấm điểm trên tập Test:
+```bash
+python src/trainers/test_classifier.py --data_path datasets/classifier_data/test --model resnet50 --weights weights/best_resnet50.pth
+```
+*Kết quả:* Xuất ra màn hình chỉ số Accuracy, Precision, Recall, F1 và tạo ra 2 file ảnh cực kỳ quan trọng cho Báo cáo (Rubric Phần 3):
+1. `test_confusion_matrix_resnet50.png`: Ma trận nhầm lẫn.
+2. `test_error_analysis_resnet50.png`: Lưới trực quan hóa các mẫu dự đoán sai.
 
 ---
 
