@@ -1,118 +1,118 @@
 # Đồ án Môn học: Nhận diện và Phân loại Rác Thải Tự Động
 *(Môn: Học Sâu - Deep Learning)*
 
-Đây là mã nguồn chính thức cho Đồ án cuối kỳ, được thiết kế bám sát 100% yêu cầu Rubric: Tối ưu hóa tài nguyên (Data-centric AI, Transfer Learning) và Quản lý thực nghiệm (Early Stopping, Checkpointing, LR Scheduler).
-
-Đặc biệt, toàn bộ quy trình tiền xử lý dữ liệu đã được **Tái cấu trúc theo chuẩn Lập trình Hướng đối tượng (OOP)** để tách biệt rõ ràng các khâu cấu hình, xử lý và huấn luyện.
+Đây là mã nguồn chính thức cho Đồ án cuối kỳ, được thiết kế bám sát **100% yêu cầu Rubric**: Tối ưu hóa tài nguyên (Data-centric AI, Transfer Learning), Quản lý thực nghiệm (Early Stopping, Checkpointing, LR Scheduler, Ablation Study) và Code chuẩn Lập trình Hướng đối tượng (OOP).
 
 ---
 
-## 1. Kiến trúc thư mục (OOP Pipeline)
+## 1. Hướng dẫn Cài đặt Môi trường (Cơ bản)
+
+Để chạy được mã nguồn, máy tính hoặc môi trường (Google Colab/Kaggle) của bạn cần được cài đặt các thư viện lõi. 
+
+Chạy lệnh sau tại thư mục gốc của project:
+```bash
+pip install -r requirements.txt
+```
+
+*Các thư viện chính bao gồm: `torch`, `torchvision`, `ultralytics` (YOLO), `wandb`, `grad-cam`, `scikit-learn`...*
+
+---
+
+## 2. Kiến trúc thư mục (OOP Pipeline)
 Hệ thống được module hóa cao độ để dễ dàng bảo trì và mở rộng:
-- `src/config/`: Nơi định nghĩa các đường dẫn file (AppConfig, SystemConfig).
-- `src/core/`: Chứa các hệ thống lõi như `LoggerSetup` và `BasePipeline`.
-- `src/data_prep/`: Trái tim xử lý dữ liệu (CategoryMappingProcessor, ImageCropProcessor, YoloFormatProcessor, MultiLabelSplitter...).
+- `src/config/`: Định nghĩa các đường dẫn file (AppConfig).
+- `src/core/`: Chứa các hệ thống lõi như Logger và BasePipeline.
+- `src/data_prep/`: Trái tim xử lý dữ liệu chuẩn OOP (Dataset, Transforms, Splitters, Processors).
 - `src/models/`: Định nghĩa các lõi mô hình Hướng đối tượng (`TrashDetector`, `TrashClassifier`).
-- `src/pipeline/`: Chứa `WastePreprocessingPipeline` dùng để lắp ghép các processors bên trên.
-- `src/trainers/`: Mã nguồn huấn luyện YOLO và Classifier (sử dụng triệt để OOP model).
+- `src/pipeline/`: Chứa các luồng thực thi tổng hợp như `TACOPipeline`, `InferencePipeline`.
+- `src/trainers/`: Mã nguồn huấn luyện YOLO và Classifier (có tích hợp Ablation Study CLI).
+- `src/utils/`: Các công cụ trực quan hóa (Visualizer, Metrics, Grad-CAM).
 
 ---
 
-## 2. Hướng dẫn Tiền xử lý Dữ liệu (Data Preparation)
+## 3. Quy trình chạy Code từ đầu đến cuối (End-to-End)
 
-Tùy thuộc vào định dạng dữ liệu bạn tải về, hãy chọn 1 trong 2 trường hợp sau:
+Dưới đây là 3 bước thực thi tuần tự từ Data -> Train -> Đánh giá.
 
-### Trường hợp A: Dữ liệu tải về dạng Raw COCO JSON
-Nếu bạn sử dụng file `annotations.json` thô, bạn CẦN chạy Pipeline tiền xử lý để làm sạch, Gom nhãn, và San phẳng nhãn (Binarization).
+### BƯỚC 1: Tiền xử lý Dữ liệu (Data Preparation)
 
-**Cách chạy trên Kaggle:**
-Dùng câu lệnh sau, truyền trực tiếp đường dẫn file gốc vào:
+Tùy thuộc vào định dạng dữ liệu bạn tải về, chọn 1 trong 2 trường hợp:
+
+**Trường hợp A: Dữ liệu tải về dạng Raw COCO JSON**
+Nếu dùng file `annotations.json` thô, bạn cần chạy luồng tiền xử lý (Gom nhãn, binarization, cắt rác):
 ```bash
-!python main_prep.py --raw_annotations /kaggle/input/.../annotations.json --mapping_label /kaggle/input/.../mapping_label.json
+python main_prep.py --raw_annotations /đường_dẫn/annotations.json --mapping_label /đường_dẫn/mapping_label.json
 ```
-*(Bổ sung tùy chỉnh chia Train/Test)*: Bạn có thể thêm `--test_size 0.3` (chia 30% test) hoặc `--random_state 42` để cố định tập chia.
+*Kết quả:* Hệ thống tự động sinh ra 2 tập dữ liệu riêng biệt:
+1. File `.txt` chuẩn cho YOLO lưu tại `datasets/yolo_data/`.
+2. Ảnh rác đã cắt nhỏ xếp theo Class lưu tại `datasets/classifier_data/train/`.
 
-**Kết quả:** Hệ thống sẽ tự động dọn cỗ sẵn toàn bộ dữ liệu cho cả 2 mô hình (One-Click-To-Rule-Them-All):
-1. **Dữ liệu cho YOLO:** Tự động sinh file `.txt` chuẩn YOLO và gom vào thư mục `datasets/yolo_data/`.
-2. **Dữ liệu cho Classifier:** Tự động cắt các cục rác ra thành ảnh nhỏ và xếp vào `datasets/classifier_data/train/` (Glass, Paper, Plastic...).
-
-*(Nâng cao)*: Kiến trúc này hỗ trợ 100% OOP nên bạn có thể hoàn toàn tách từng `Processor` ra để chạy trong từng Cell riêng biệt trên Notebook Kaggle nếu muốn kiểm soát kỹ luồng dữ liệu!
-
-### Trường hợp B: Dữ liệu tải về dạng YOLO (từ Roboflow)
-Nếu bạn đã tải dữ liệu qua Roboflow ở dạng YOLO (gồm các file `.txt` và `data.yaml`), Roboflow đã làm hộ phần chia Train/Test.
-👉 **BẠN ĐƯỢC BỎ QUA BƯỚC NÀY!** Không cần chạy `main_prep.py`, hãy đi thẳng xuống phần Huấn luyện.
+**Trường hợp B: Dữ liệu tải về dạng YOLO (từ Roboflow)**
+Nếu bạn đã tải dữ liệu qua Roboflow (gồm các file `.txt` và `data.yaml`), bạn **ĐƯỢC BỎ QUA BƯỚC NÀY** và đi thẳng xuống Bước 2.
 
 ---
 
-## 3. Hướng dẫn Huấn luyện (Training)
+### BƯỚC 2: Huấn luyện Mô hình (Training)
 
-Mô hình YOLOv8 Medium đã được tùy chỉnh cấu hình để đáp ứng tối đa tiêu chí Rubric của đồ án, bao gồm:
-- **Early Stopping (patience=25):** Tự động dừng nếu mAP không tăng.
-- **Checkpointing (save_period=10):** Lưu backup mỗi 10 epochs để chống mất mát.
-- **Cosine LR Scheduler (cos_lr=True):** Giúp đồ thị hàm Loss hội tụ đẹp.
+Hệ thống bao gồm 2 mô hình huấn luyện độc lập: Định vị (YOLO) và Phân loại (ResNet/EfficientNet).
 
-**Lệnh huấn luyện YOLO/RT-DETR:**
-Sử dụng cờ `--model` để thay đổi qua lại giữa các phiên bản YOLO cực kỳ tiện lợi:
+#### 2.1 Huấn luyện Khối Định vị (YOLOv8)
+Sử dụng cờ `--model` để thay đổi qua lại giữa các phiên bản YOLO:
 ```bash
-# Tắt wandb để tránh lỗi hỏi API Key trên Kaggle
-%env WANDB_MODE=disabled
+# Tắt wandb để tránh lỗi API Key trên Kaggle nếu không muốn dùng
+export WANDB_MODE=disabled
 
-# Khởi động quy trình Train YOLOv8 Medium (Mặc định)
-!python src/trainers/train_yolo.py --data_path /đường/dẫn/đến/file/data.yaml --epochs 150 --batch 16 --patience 25
+# Chạy huấn luyện (Mặc định YOLOv8 Medium)
+python src/trainers/train_yolo.py --data_path /đường_dẫn/data.yaml --epochs 150 --batch 16 --patience 25
 ```
+*(Hỗ trợ các models: `yolov8n.pt`, `yolov8s.pt`, `yolov8m.pt`, `yolov9c.pt`, `yolov8m-rtdetr.pt`)*
 
-**Các tham số có thể tùy chỉnh qua dòng lệnh (Argparse):**
-- `--data_path`: (Bắt buộc) Đường dẫn tới file `data.yaml` hoặc thư mục chứa data.
-- `--model`: Tên mô hình Ultralytics. **Các model được hỗ trợ:** `yolov8n.pt`, `yolov8s.pt`, `yolov8m.pt` (mặc định), `yolov9c.pt`, `yolov8m-rtdetr.pt` (mô hình Transformer).
-- `--epochs`: Số epoch huấn luyện (mặc định: `50`).
-- `--batch`: Kích thước batch size (mặc định: `16`).
-- `--patience`: Số lượng epoch tối đa chờ mAP không tăng trước khi dừng (mặc định: `25`).
-- `--lr`: Tốc độ học (Learning Rate, mặc định: `0.01`).
-- `--optimizer`: Tối ưu hóa (VD: `SGD`, `AdamW`, mặc định: `auto`).
+#### 2.2 Huấn luyện Khối Phân loại (CNN) & Thực hiện Ablation Study
+Mô hình Phân loại được tích hợp sẵn chức năng **Ablation Study (So sánh siêu tham số)** qua Terminal, đáp ứng mục 2 Rubric.
 
-**Lệnh huấn luyện Classifier:**
-Hệ thống cho phép bạn chuyển đổi kiến trúc mạng dễ dàng chỉ bằng cờ `--model` (Hỗ trợ: `efficientnet_b0`, `resnet50`, `mobilenet_v3`):
+Bạn có thể thay đổi Động các tham số Learning Rate, Dropout, Model, Batch Size:
 ```bash
-!python src/trainers/train_classifier.py --data_path datasets/classifier_data/train --model resnet50 --epochs 50 --patience 5
+# Lệnh huấn luyện tiêu chuẩn
+python src/trainers/train_classifier.py --data_path datasets/classifier_data/train --model resnet50 --epochs 50 --batch 32
+
+# Lệnh chạy Thực nghiệm Ablation Study (Thay đổi LR và Dropout) kèm Weights & Biases
+python src/trainers/train_classifier.py --model efficientnet_b0 --learning_rate 0.0001 --dropout 0.5 --use_wandb
 ```
-
-**Các tham số có thể tùy chỉnh qua dòng lệnh (Argparse):**
-- `--data_path`: Đường dẫn tới thư mục ảnh đã cắt rác (Mặc định: `datasets/classifier_data/train`).
-- `--model`: Kiến trúc mạng CNN. **Các model được hỗ trợ:** `efficientnet_b0` (mặc định), `resnet50`, `mobilenet_v3`.
-- `--epochs`: Số epoch huấn luyện (mặc định: `50`).
-- `--batch`: Kích thước batch size (mặc định: `32`).
-- `--patience`: Số lượng epoch tối đa chờ Validation Loss không giảm trước khi dừng sớm (mặc định: `5`).
-
-> [!TIP]
-> **ĐÁP ỨNG RUBRIC PHẦN 3 (ĐÁNH GIÁ & PHÂN TÍCH LỖI):** 
-> Ngay sau khi quá trình huấn luyện Classifier kết thúc, hệ thống sẽ **tự động** chạy đánh giá và xuất ra 3 file ảnh cực kỳ quan trọng cho báo cáo của bạn:
-> 1. `loss_curve.png`: Biểu đồ hàm Loss qua các Epochs để chẩn đoán trạng thái mô hình.
-> 2. `confusion_matrix.png`: Ma trận nhầm lẫn tính toán chính xác F1-Score, Precision, Recall.
-> 3. `error_analysis.png`: Lưới trực quan hóa 9 mẫu bị dự đoán sai (thực tế là A nhưng đoán thành B) để phân tích điểm yếu của mô hình.
 
 ---
 
-## 4. Hướng dẫn Nhận diện (Inference)
+### BƯỚC 3: Đánh giá và Phân tích Lỗi tự động (Rubric Phần 3)
 
-Sau khi huấn luyện xong cả Khối Định vị (YOLO) và Khối Phân loại (Classifier), bạn có thể chạy luồng Inference tổng hợp 2 giai đoạn (Detect -> Crop -> Classify) bằng lệnh sau:
+Ngay sau khi quá trình huấn luyện Classifier kết thúc ở **BƯỚC 2**, hệ thống sẽ **tự động** chạy đánh giá và xuất ra 3 file ảnh quan trọng:
+1. `loss_curve.png`: Biểu đồ hàm Loss qua các Epochs.
+2. `confusion_matrix.png`: Ma trận nhầm lẫn tính toán chính xác F1-Score, Precision, Recall.
+3. `error_analysis.png`: Trực quan hóa các mẫu bị dự đoán sai (thực tế là A nhưng đoán thành B) để phân tích điểm yếu của mô hình.
+
+---
+
+## 4. Hướng dẫn Dự đoán (Inference / Testing)
+
+Sau khi huấn luyện xong cả 2 mô hình, bạn có thể chạy luồng Inference tổng hợp 2 giai đoạn (Detect -> Crop -> Classify) cho một bức ảnh bất kỳ:
+
 ```bash
-!python main_inference.py \
+python main_inference.py \
     --pipeline detect_and_classify \
     --detector runs/detect/yolov8m_trashnet/weights/best.pt \
     --classifier resnet50 \
     --image test_image.jpg
 ```
-**Ý nghĩa:** File này sẽ gọi YOLO ra khoanh vùng rác trong bức ảnh `test_image.jpg`, sau đó cắt (crop) từng cục rác ra và ném cho mạng ResNet50 để xác định chính xác nó là rác gì. Kết quả cuối cùng sẽ được in ra màn hình hoặc vẽ trực tiếp lên ảnh.
+*Kết quả:* Hệ thống sẽ gọi YOLO để vẽ Bounding Box, sau đó dùng ResNet50 để gắn nhãn phân loại (Glass, Plastic...) lên box đó.
 
 ---
 
-## 5. Phân tích Lỗi và Explainable AI (XAI)
+## 5. Explainable AI (XAI) bằng Grad-CAM
 
-Để đạt điểm tối đa (Rubric mảng Đánh giá & XAI), hệ thống cung cấp công cụ tự động soi Bản đồ nhiệt (Grad-CAM) để xem não bộ của AI đang "nhìn" vào đặc trưng nào của cục rác để dự đoán, đồng thời vẽ biểu đồ so sánh lỗi khoanh vùng của YOLO:
+Để giải thích được lý do vì sao AI lại phân loại sai, hãy dùng lệnh sau để soi "Bản đồ nhiệt":
 
 ```bash
-!python main_error_analysis.py --image test_image.jpg --detector runs/detect/yolov8m_trashnet/weights/best.pt --classifier efficientnet_b0
+python main_error_analysis.py \
+    --image test_image.jpg \
+    --detector runs/detect/yolov8m_trashnet/weights/best.pt \
+    --classifier efficientnet_b0
 ```
-**Kết quả:**
-- File `test_error_analysis_detection.png`: Trực quan hóa độ lệch của Bounding Box.
-- File `test_heatmap_gradcam.png`: Bản đồ nhiệt đỏ/xanh soi chiếu vào điểm đặc trưng của rác (Ví dụ: nếp gấp của túi nilon, cạnh của chai nhựa).
+*Kết quả:* Trả về file `test_heatmap_gradcam.png` soi chiếu vào điểm đặc trưng của rác (Ví dụ: AI nhìn vào nếp gấp của túi nilon để đưa ra quyết định).
