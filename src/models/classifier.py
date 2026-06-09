@@ -9,7 +9,7 @@ class TrashClassifier:
     Lớp Phân loại (Classification) hỗ trợ cả ResNet50 và EfficientNet-B0.
     Chuyên đọc các bức ảnh mini (đã được cắt rác) để phân loại thành Nhựa, Giấy, Kim loại...
     """
-    def __init__(self, model_name: str = 'resnet50', num_classes: int = 6, model_weights_path: str = None, pretrained: bool = False):
+    def __init__(self, model_name: str = 'resnet50', num_classes: int = 6, model_weights_path: str = None, pretrained: bool = False, dropout_rate: float = 0.0):
         """
         Khởi tạo mạng phân loại.
         
@@ -23,7 +23,13 @@ class TrashClassifier:
         if self.model_name == 'resnet50':
             self.model = models.resnet50(pretrained=pretrained)
             num_ftrs = self.model.fc.in_features
-            self.model.fc = torch.nn.Linear(num_ftrs, num_classes)
+            if dropout_rate > 0.0:
+                self.model.fc = torch.nn.Sequential(
+                    torch.nn.Dropout(p=dropout_rate),
+                    torch.nn.Linear(num_ftrs, num_classes)
+                )
+            else:
+                self.model.fc = torch.nn.Linear(num_ftrs, num_classes)
         elif self.model_name == 'efficientnet_b0':
             self.model = models.efficientnet_b0(pretrained=pretrained)
             num_ftrs = self.model.classifier[1].in_features

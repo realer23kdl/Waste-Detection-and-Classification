@@ -8,6 +8,7 @@ import numpy as np
 import random
 import os
 import sys
+import wandb
 
 # Thêm đường dẫn gốc để import file dataset.py
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -30,8 +31,14 @@ class ClassifierTrainer:
     Vòng lặp huấn luyện (Training Loop) chuyên nghiệp cho PyTorch.
     Bao gồm: Forward, Backward, Scheduler, Early Stopping, Checkpointing, và Weighted Loss.
     """
-    def __init__(self, model, train_loader, val_loader, device='cuda', patience=5, class_weights=None):
+    def __init__(self, model, train_loader, val_loader, device='cuda', patience=5, class_weights=None, learning_rate=0.001, use_wandb=False):
         set_seed(42)
+        
+        self.model = model.to(device)
+        self.train_loader = train_loader
+        self.val_loader = val_loader
+        self.device = device
+        self.use_wandb = use_wandb
         
         self.model = model.to(device)
         self.train_loader = train_loader
@@ -46,7 +53,7 @@ class ClassifierTrainer:
         else:
             self.criterion = nn.CrossEntropyLoss()
         
-        self.optimizer = optim.Adam(self.model.parameters(), lr=0.001)
+        self.optimizer = optim.Adam(self.model.parameters(), lr=learning_rate)
         # Cập nhật PyTorch >= 2.2: Hàm ReduceLROnPlateau đã loại bỏ tham số verbose
         self.scheduler = ReduceLROnPlateau(self.optimizer, mode='min', factor=0.1, patience=2)
         
@@ -94,6 +101,14 @@ class ClassifierTrainer:
             
             print(f"Epoch {epoch+1}/{num_epochs} - Train Loss: {train_loss:.4f} - Val Loss: {val_loss:.4f}")
             
+            if self.use_wandb:
+                wandb.log({
+                    "Train Loss": train_loss,
+                    "Val Loss": val_loss,
+                    "Learning Rate": self.optimizer.param_groups[0]['lr'],
+                    "Epoch": epoch + 1
+                })
+            
             self.scheduler.step(val_loss)
             
             if val_loss < self.best_val_loss:
@@ -119,15 +134,23 @@ if __name__ == "__main__":
     parser.add_argument('--model', type=str, default='efficientnet_b0', choices=['efficientnet_b0', 'resnet50', 'mobilenet_v3'], help="Kiến trúc mạng")
     parser.add_argument('--epochs', type=int, default=50)
     parser.add_argument('--batch', type=int, default=32)
+    parser.add_argument('--learning_rate', type=float, default=0.001, help="Tốc độ học")
+    parser.add_argument('--dropout', type=float, default=0.3, help="Tỷ lệ Dropout")
     parser.add_argument('--patience', type=int, default=5, help="Early stopping patience")
+    parser.add_argument('--use_wandb', action='store_true', help="Bật log Weights & Biases")
     args = parser.parse_args()
+
+    if args.use_wandb:
+        wandb.init(project="trashnet-classifier", config=vars(args))
 
     # KHỐI LỆNH THỰC THI CHUẨN RUBRIC (Kế thừa Dataset & Sử dụng DataLoader)
     print(f"Khởi tạo Data Pipeline cho Classifier với mạng {args.model}...")
     
-    # 1. Cấu hình biến đổi ảnh
+    # 1. Cấu hình biến đổi ảnh (Data Augmentation)
     transform = transforms.Compose([
         transforms.Resize((224, 224)),
+        transforms.RandomHorizontalFlip(p=0.5),
+        transforms.RandomRotation(15),
         transforms.ToTensor(),
         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
     ])
@@ -148,7 +171,7 @@ if __name__ == "__main__":
         
         # 5. Khởi tạo Mô hình động dựa trên Argparse (SỬ DỤNG OOP TRASH CLASSIFIER)
         print(f"Đang khởi tạo mô hình {args.model} thông qua OOP TrashClassifier...")
-        classifier_wrapper = TrashClassifier(model_name=args.model, num_classes=num_classes, pretrained=True)
+        classifier_wrapper = TrashClassifier(model_name=args.model, num_classes=num_classes, pretrained=True, dropout_rate=args.dropout)
         model = classifier_wrapper.model
             
         # 6. Truyền class_weights vào Trainer
@@ -158,7 +181,9 @@ if __name__ == "__main__":
             val_loader=val_loader, 
             device='cuda' if torch.cuda.is_available() else 'cpu',
             patience=args.patience,
-            class_weights=class_weights
+            class_weights=class_weights,
+            learning_rate=args.learning_rate,
+            use_wandb=args.use_wandb
         )
         
         # 7. Bắt đầu huấn luyện
@@ -199,6 +224,9 @@ if __name__ == "__main__":
         evaluator.plot_wrong_predictions(train_dataset, y_true, y_pred, num_samples=9, save_path=f"error_analysis_{args.model}.png")
         
         print("\n[HOÀN TẤT] Quá trình huấn luyện và đánh giá mô hình đã kết thúc.")
+        
+        if args.use_wandb:
+            wandb.finish()
         
     else:
         print(f"Không tìm thấy thư mục dữ liệu: {DATA_DIR}")
