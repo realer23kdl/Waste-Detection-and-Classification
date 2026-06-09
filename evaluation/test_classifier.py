@@ -15,6 +15,7 @@ def main():
     parser.add_argument('--weights', type=str, required=True, help="Đường dẫn file weights (.pth)")
     parser.add_argument('--data_path', type=str, required=True, help="Thư mục chứa ảnh test")
     parser.add_argument('--model', type=str, default='resnet50', help="Tên model")
+    parser.add_argument('--dropout', type=float, default=0.3, help="Tỷ lệ Dropout (phải khớp với lúc train)")
     args = parser.parse_args()
 
     print(f"Đang nạp tập dữ liệu từ {args.data_path}")
@@ -29,7 +30,7 @@ def main():
     print(f"Khởi tạo mô hình {args.model}...")
     num_classes = len(test_dataset.classes)
     
-    model_wrapper = TrashClassifier(model_name=args.model, num_classes=num_classes)
+    model_wrapper = TrashClassifier(model_name=args.model, num_classes=num_classes, dropout_rate=args.dropout)
     model = model_wrapper.model
     
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
