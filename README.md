@@ -67,8 +67,17 @@ python data_pipeline/main_prep.py --raw_annotations /đường_dẫn/annotations
 1. File `.txt` chuẩn cho YOLO lưu tại `datasets/yolo_data/`.
 2. Ảnh rác đã cắt nhỏ xếp theo Class lưu tại `datasets/classifier_data/train/`.
 
-**Trường hợp B: Dữ liệu tải về dạng YOLO (từ Roboflow)**
-Nếu bạn đã tải dữ liệu qua Roboflow (gồm các file `.txt` và `data.yaml`), bạn **ĐƯỢC BỎ QUA BƯỚC NÀY** và đi thẳng xuống Bước 2.
+**Trường hợp B: Dữ liệu tải về dạng COCO (từ Roboflow)**
+Nếu bạn tải dữ liệu COCO chia sẵn từ Roboflow, hãy chạy luồng xử lý riêng cho nó và **nhớ truyền file mapping** để gom 60 nhãn về 7 nhãn:
+```bash
+python data_pipeline/roboflow_coco_prep.py --dataset_dir /đường_dẫn_thư_mục_roboflow --mapping_label src/config/mapping_label.json
+```
+
+**Trường hợp C: Dữ liệu tải về dạng YOLO (từ Roboflow)**
+Nếu bạn đã tải dữ liệu chuẩn YOLO qua Roboflow (gồm các file `.txt` và `data.yaml`), bạn **ĐƯỢC BỎ QUA KHÂU BỞI YOLO** nhưng vẫn cần dùng lệnh cắt rác:
+```bash
+python data_pipeline/crop_from_yolo.py --dataset_dir /đường_dẫn_yolo --mapping_label src/config/mapping_label.json
+```
 
 ---
 
