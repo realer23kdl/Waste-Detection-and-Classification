@@ -40,9 +40,8 @@ our_pipeline/
 ├── evaluation/                  <- Khối 3: Công cụ Đánh giá & Triển khai (Đầu ra)
 │   ├── run_inference.py         <- Kịch bản chạy thực tế: Đưa ảnh vào dự đoán toàn bộ quy trình.
 │   ├── ablation_comparison.py   <- Thực nghiệm So sánh hiệu quả giữa việc Có cắt rác (Crop) và Không cắt rác.
-│   ├── error_analysis.py        <- Chạy AI Giải thích (XAI - Grad-CAM) để phân tích lý do dự đoán sai.
-│   ├── demo_team.py             <- Kịch bản demo ngắn ngọn về DataLoader, Early Stopping, LR Scheduler.
-│   └── test_local.py            <- Kịch bản nháp (sandbox) để test các hàm nhỏ cục bộ.
+│   └── error_analysis.py        <- Chạy AI Giải thích (XAI - Grad-CAM) để phân tích lý do dự đoán sai.
+│
 │
 ├── README.md                    <- "Trang bìa" của dự án, giải thích tổng quan và hướng dẫn sử dụng.
 └── requirements.txt             <- Danh sách các thư viện mã nguồn mở cần cài đặt.
