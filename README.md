@@ -142,7 +142,8 @@ python src/trainers/train_classifier.py --model efficientnet_b0 --learning_rate 
 
 ### BƯỚC 3: Đánh giá Độc lập (Chạy Test tách biệt)
 
-Thay vì Đánh giá tự động ngay sau khi Train, bạn có thể chạy riêng các tập lệnh Test sau khi đã có file trọng số tốt nhất (`best.pt` hoặc `best_resnet50.pth`):
+Thay vì Đánh giá tự động ngay sau khi Train, bạn có thể chạy riêng các tập lệnh Test sau khi đã có file trọng số tốt nhất. 
+*(Lưu ý: Hệ thống YOLO luôn lưu trọng số dưới tên cố định là `best.pt`. Trong khi đó, khối Phân loại sẽ tự động lưu tên động theo mô hình bạn chọn, ví dụ: `best_resnet50.pth`, `best_efficientnet_b0.pth` hoặc `best_mobilenet_v3.pth`)*
 
 #### 3.1 Chấm điểm Mô hình Định vị (YOLO)
 ```bash
