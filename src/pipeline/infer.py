@@ -45,13 +45,39 @@ class DetectAndClassifyPipeline:
         cropped_images = self.cropper.crop_objects(image_path, bounding_boxes)
         print(f"[Pipeline] Đã cắt thành công {len(cropped_images)} mảnh rác mini.")
         
-        # BƯỚC 3: Đưa rác mini đi đọc tên
-        labels = self.classifier.predict(cropped_images)
+        # BƯỚC 3: Đưa rác mini đi đọc tên và lấy xác suất (Confidence)
+        predictions = self.classifier.predict(cropped_images, return_prob=True)
         
-        # TỔNG KẾT
+        # TỔNG KẾT VÀ VẼ ẢNH TRỰC QUAN
+        import cv2
+        img = cv2.imread(image_path)
+        labels_only = []
+        
         print("\n=== KẾT QUẢ CUỐI CÙNG ===")
-        for i, label in enumerate(labels):
-            print(f"Cục rác thứ {i+1} ở tọa độ {bounding_boxes[i]} là: {label.upper()}")
+        for i, (label, prob) in enumerate(predictions):
+            box = bounding_boxes[i]
+            x_min, y_min, x_max, y_max = map(int, box[:4])
+            labels_only.append(label)
+            
+            # Text hiển thị (Ví dụ: NHỰA (95.5%))
+            display_text = f"{label.upper()} ({prob*100:.1f}%)"
+            print(f"Cục rác thứ {i+1} ở tọa độ {box} là: {display_text}")
+            
+            # Vẽ khung Bounding Box màu xanh lá
+            cv2.rectangle(img, (x_min, y_min), (x_max, y_max), (0, 255, 0), 3)
+            
+            # Vẽ nền chữ
+            (w, h), _ = cv2.getTextSize(display_text, cv2.FONT_HERSHEY_SIMPLEX, 0.7, 2)
+            cv2.rectangle(img, (x_min, y_min - 30), (x_min + w, y_min), (0, 255, 0), -1)
+            # Viết chữ đen lên nền xanh
+            cv2.putText(img, display_text, (x_min, y_min - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
+            
         print("=========================")
         
-        return bounding_boxes, labels
+        # Lưu ảnh
+        output_path = "inference_result.jpg"
+        cv2.imwrite(output_path, img)
+        print(f"\n[Visualizer] TADA! Đã vẽ xong khung, nhãn và độ tin cậy.")
+        print(f"[Visualizer] Ảnh trực quan đã được lưu tại: {output_path}")
+        
+        return bounding_boxes, labels_only
