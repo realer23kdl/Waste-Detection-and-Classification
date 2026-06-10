@@ -16,7 +16,7 @@ def run_ablation_comparison(image_path, yolo_weights='yolov8n.pt', classifier_mo
     print(f"Mô hình sử dụng: {classifier_model.upper()} và {yolo_weights}")
     
     # Nạp mô hình
-    classifier = TrashClassifier(model_name=classifier_model, num_classes=6, model_weights_path=classifier_weights)
+    classifier = TrashClassifier(model_name=classifier_model, num_classes=7, model_weights_path=classifier_weights)
     detector = TrashDetector(model_path=yolo_weights, model_type='yolo' if 'yolo' in yolo_weights else 'rtdetr')
     cropper = ImageCropper(padding=10)
     

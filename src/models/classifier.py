@@ -66,8 +66,8 @@ class TrashClassifier:
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
         ])
         
-        # Ánh xạ ID ra tên chữ (Ví dụ)
-        self.class_names = ["Thủy tinh", "Giấy", "Bìa cứng", "Nhựa", "Kim loại", "Rác hỗn hợp"]
+        # Ánh xạ ID ra tên chữ (Xếp theo bảng chữ cái A-Z chuẩn của PyTorch ImageFolder)
+        self.class_names = ["Bìa cứng", "Thủy tinh", "Kim loại", "Giấy", "Nhựa", "Rác hỗn hợp", "Không xác định (Unknown)"]
 
     def predict(self, cropped_images: List[np.ndarray], return_prob: bool = False):
         """

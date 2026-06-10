@@ -24,7 +24,8 @@ class DetectAndClassifyPipeline:
         self.cropper = ImageCropper(padding=10)
         
         # 3. Mạng phân loại (Của người số 1)
-        self.classifier = TrashClassifier(model_name=classifier_model_name, num_classes=6, model_weights_path=resnet_weights)
+        # Sửa thành num_classes=7 vì tập data có thêm thư mục "unknown"
+        self.classifier = TrashClassifier(model_name=classifier_model_name, num_classes=7, model_weights_path=resnet_weights)
         print("======================================\n")
 
     def run(self, image_path: str, conf_threshold: float = 0.05):
