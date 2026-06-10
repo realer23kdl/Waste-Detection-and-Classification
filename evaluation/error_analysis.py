@@ -11,7 +11,7 @@ from src.pipeline.infer import DetectAndClassifyPipeline
 from src.utils.visualizer import Visualizer
 from src.utils.grad_cam_explainer import ErrorAnalyzer
 from torchvision import transforms
-from src.config.app_config import AppConfigs
+from src.config.app_config import AppConfig
 
 def download_image(url, save_path):
     print(f"Đang tải ảnh thử nghiệm từ Internet...")
