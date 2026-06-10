@@ -28,14 +28,40 @@ our_pipeline/
 │   ├── roboflow_coco_prep.py    <- Script chuyên biệt xử lý dữ liệu COCO tải từ nền tảng Roboflow.
 │   └── crop_from_yolo.py        <- Script tự động cắt rác (crop) dựa trên nhãn YOLO có sẵn.
 │
-├── src/                         <- Khối 2: Lõi Thuật toán & Core (Bộ não OOP)
-│   ├── config/                  <- Định nghĩa các đường dẫn file (AppConfig).
-│   ├── core/                    <- Chứa các hệ thống lõi như Logger và BasePipeline.
-│   ├── data_prep/               <- Lõi xử lý dữ liệu chuẩn OOP (Dataset, Transforms, Splitters, Processors).
-│   ├── models/                  <- Định nghĩa các lõi mô hình Hướng đối tượng (TrashDetector, TrashClassifier).
-│   ├── pipeline/                <- Chứa các luồng thực thi tổng hợp như TACOPipeline, InferencePipeline.
-│   ├── trainers/                <- Lõi mã nguồn huấn luyện YOLO và Classifier.
-│   └── utils/                   <- Các công cụ trực quan hóa (Visualizer, Metrics, Grad-CAM).
+├── src/                         <- Khối 2: Lõi Thuật toán & Mã nguồn chính
+│   ├── config/                  <- Thư mục cấu hình hệ thống
+│   │   ├── app_config.py        <- Định nghĩa các đường dẫn hằng số (Thư mục Dataset, Model, Log).
+│   │   └── mapping_label.json   <- Tệp ánh xạ chuyển đổi từ 60 nhãn gốc của bộ TACO sang 7 nhãn chuẩn.
+│   │
+│   ├── core/                    <- Các module lõi
+│   │   ├── base_pipeline.py     <- Lớp trừu tượng (Abstract Class) cho cấu trúc Pipeline.
+│   │   └── logger.py            <- Ghi nhận log hệ thống ra file và Terminal.
+│   │
+│   ├── data_prep/               <- Khối nạp và xử lý dữ liệu (Sử dụng PyTorch)
+│   │   ├── dataset.py           <- Kế thừa `torch.utils.data.Dataset`, tích hợp xử lý Class Imbalance.
+│   │   ├── transforms.py        <- Định nghĩa các phép biến đổi ảnh (Resize, Normalize) và Data Augmentation.
+│   │   ├── splitters/           <- Kịch bản phân chia tập Train/Val/Test.
+│   │   └── processors/          <- Thuật toán tiền xử lý và chuẩn hóa dữ liệu.
+│   │
+│   ├── models/                  <- Định nghĩa kiến trúc mô hình (Model Architectures)
+│   │   ├── detector.py          <- Lớp `TrashDetector`: Tích hợp và điều khiển mô hình YOLO.
+│   │   └── classifier.py        <- Lớp `TrashClassifier`: Khởi tạo kiến trúc CNN (ResNet), cấu hình Transfer Learning.
+│   │
+│   ├── pipeline/                <- Các luồng thực thi tổng hợp
+│   │   ├── infer.py             <- Lớp `DetectAndClassifyPipeline`: Kết nối mô hình phát hiện và mô hình phân loại.
+│   │   └── taco_pipeline.py     <- Kịch bản tải và chuẩn bị dữ liệu cho bộ TACO.
+│   │
+│   ├── trainers/                <- Kịch bản Huấn luyện và Đánh giá (Train & Test Scripts)
+│   │   ├── train_yolo.py        <- Khởi chạy huấn luyện mạng YOLOv8.
+│   │   ├── train_classifier.py  <- Vòng lặp huấn luyện CNN (tích hợp Early Stopping, LR Scheduler, Weighted Loss).
+│   │   ├── test_yolo.py         <- Đánh giá mô hình định vị (Tính toán mAP).
+│   │   └── test_classifier.py   <- Đánh giá mô hình phân loại (Xuất Classification Report).
+│   │
+│   └── utils/                   <- Các tiện ích hỗ trợ (Utilities)
+│       ├── cropper.py           <- Lớp `ImageCropper` (dùng OpenCV) cắt vùng đối tượng từ Bounding Box.
+│       ├── grad_cam_explainer.py<- Ứng dụng XAI (Explainable AI) tạo Bản đồ nhiệt (Heatmap).
+│       ├── visualizer.py        <- Trực quan hóa Ma trận nhầm lẫn (Confusion Matrix) và kết quả dự đoán.
+│       └── metrics.py           <- Hàm tính toán các chỉ số định lượng (F1-Score, Precision, Recall).
 │
 ├── evaluation/                  <- Khối 3: Công cụ Đánh giá & Triển khai (Đầu ra)
 │   ├── run_inference.py         <- Kịch bản chạy thực tế: Đưa ảnh vào dự đoán toàn bộ quy trình.
