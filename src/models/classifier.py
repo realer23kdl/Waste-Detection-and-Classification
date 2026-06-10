@@ -43,7 +43,17 @@ class TrashClassifier:
         
         # Nếu có file trọng số tự train thì nạp vào
         if model_weights_path:
-            self.model.load_state_dict(torch.load(model_weights_path, map_location=torch.device('cpu')))
+            state_dict = torch.load(model_weights_path, map_location=torch.device('cpu'))
+            
+            # Sửa lỗi lệch key nếu lúc train có dùng Dropout nhưng lúc test thì không
+            if "fc.1.weight" in state_dict and not isinstance(self.model.fc, torch.nn.Sequential):
+                state_dict["fc.weight"] = state_dict.pop("fc.1.weight")
+                state_dict["fc.bias"] = state_dict.pop("fc.1.bias")
+            elif "fc.weight" in state_dict and isinstance(self.model.fc, torch.nn.Sequential):
+                state_dict["fc.1.weight"] = state_dict.pop("fc.weight")
+                state_dict["fc.1.bias"] = state_dict.pop("fc.bias")
+                
+            self.model.load_state_dict(state_dict)
             print(f"[Classifier] Đã nạp thành công trọng số từ {model_weights_path}")
             
         self.model.eval() # Bật chế độ đánh giá (không train)
