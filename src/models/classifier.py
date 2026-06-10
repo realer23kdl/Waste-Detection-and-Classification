@@ -67,7 +67,8 @@ class TrashClassifier:
         ])
         
         # Ánh xạ ID ra tên chữ (Xếp theo bảng chữ cái A-Z chuẩn của PyTorch ImageFolder)
-        self.class_names = ["Bìa cứng", "Thủy tinh", "Kim loại", "Giấy", "Nhựa", "Rác hỗn hợp", "Không xác định (Unknown)"]
+        # Bỏ dấu tiếng Việt để tránh lỗi font chữ OpenCV (??? trên ảnh)
+        self.class_names = ["BIA CUNG", "THUY TINH", "KIM LOAI", "GIAY", "NHUA", "RAC HON HOP", "UNKNOWN"]
 
     def predict(self, cropped_images: List[np.ndarray], return_prob: bool = False):
         """
