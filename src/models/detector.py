@@ -46,7 +46,7 @@ class TrashDetector:
         print(f"[Detector] Đã phát hiện {len(bounding_boxes)} cục rác trong ảnh.")
         return bounding_boxes
 
-    def train(self, data_yaml_path: str, epochs: int = 50, batch_size: int = 16, patience: int = 25, imgsz: int = 640, project: str = 'runs/detect', name: str = 'yolov8_trashnet'):
+    def train(self, data_yaml_path: str, epochs: int = 50, batch_size: int = 16, patience: int = 25, imgsz: int = 640, project: str = 'runs/detect', name: str = 'yolov8_trashnet', optimizer: str = 'auto', lr0: float = 0.01):
         """
         Huấn luyện mô hình YOLO trực tiếp qua OOP.
         """
@@ -64,8 +64,9 @@ class TrashDetector:
                 patience=patience,
                 save=True,
                 save_period=10,
+                optimizer=optimizer,
                 cos_lr=True,
-                lr0=0.01,
+                lr0=lr0,
                 lrf=0.01,
                 mosaic=1.0,
                 degrees=10.0,

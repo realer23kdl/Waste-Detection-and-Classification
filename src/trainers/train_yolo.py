@@ -51,7 +51,9 @@ def train_yolo_model(data_path: str, model_name: str = 'yolov8m.pt', epochs: int
         epochs=epochs,
         batch_size=batch_size,
         patience=patience,
-        name='yolov8m_trashnet'
+        name='yolov8m_trashnet',
+        optimizer=optimizer,
+        lr0=lr
     )
     
     print(f"Huấn luyện hoàn tất! Trọng số tốt nhất được lưu tại: runs/detect/yolov8s_trashnet/weights/best.pt")
