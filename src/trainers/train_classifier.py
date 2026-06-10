@@ -132,10 +132,11 @@ if __name__ == "__main__":
     parser.add_argument('--model', type=str, default='efficientnet_b0', choices=['efficientnet_b0', 'resnet50', 'mobilenet_v3'], help="Kiến trúc mạng")
     parser.add_argument('--epochs', type=int, default=50)
     parser.add_argument('--batch', type=int, default=32)
-    parser.add_argument('--learning_rate', type=float, default=0.001, help="Tốc độ học")
+    parser.add_argument('--learning_rate', type=float, default=0.0001, help="Tốc độ học (Nên để 1e-4 cho Transfer Learning)")
     parser.add_argument('--dropout', type=float, default=0.3, help="Tỷ lệ Dropout")
     parser.add_argument('--patience', type=int, default=5, help="Early stopping patience")
     parser.add_argument('--use_tensorboard', action='store_true', help="Bật log TensorBoard")
+    parser.add_argument('--freeze_base', action='store_true', help="Đóng băng các layer Conv của mạng pre-trained để chỉ train lớp phân loại cuối")
     args = parser.parse_args()
 
     # KHỐI LỆNH THỰC THI CHUẨN RUBRIC (Kế thừa Dataset & Sử dụng DataLoader)
@@ -168,6 +169,13 @@ if __name__ == "__main__":
         print(f"Đang khởi tạo mô hình {args.model} thông qua OOP TrashClassifier...")
         classifier_wrapper = TrashClassifier(model_name=args.model, num_classes=num_classes, pretrained=True, dropout_rate=args.dropout)
         model = classifier_wrapper.model
+        
+        # Áp dụng Đóng băng Trọng số (Freeze Base Model) để chống Model Collapse
+        if args.freeze_base:
+            print("Đã bật chế độ FREEZE BASE MODEL. Chỉ huấn luyện lớp Fully Connected cuối cùng!")
+            for name, param in model.named_parameters():
+                if "fc" not in name and "classifier" not in name:
+                    param.requires_grad = False
             
         # 6. Truyền class_weights vào Trainer
         trainer = ClassifierTrainer(
