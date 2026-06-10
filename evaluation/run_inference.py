@@ -17,6 +17,7 @@ def main():
     parser.add_argument('--classifier', type=str, default='efficientnet_b0', choices=['resnet50', 'efficientnet_b0', 'mobilenet_v3'], help="Tên mạng phân loại")
     parser.add_argument('--classifier_weights', type=str, default='weights/best_resnet50.pth', help="Đường dẫn file trọng số của mạng phân loại")
     parser.add_argument('--image', type=str, default='test_image.jpg', help="Đường dẫn ảnh test")
+    parser.add_argument('--conf', type=float, default=0.25, help="Ngưỡng độ tin cậy của YOLO (ví dụ: 0.25, 0.5)")
     
     args = parser.parse_args()
 
@@ -29,7 +30,7 @@ def main():
         print(f">>> ĐANG CHẠY DETECT ({args.detector}) + CROP + CLASSIFY ({args.classifier}) <<<")
         pipeline_p2 = DetectAndClassifyPipeline(yolo_weights=args.detector, resnet_weights=args.classifier_weights, classifier_model_name=args.classifier)
         try:
-            pipeline_p2.run(args.image)
+            pipeline_p2.run(args.image, conf_threshold=args.conf)
         except Exception as e:
             print(f"Lỗi: {e}. Nhớ tải ảnh test_image.jpg vào thư mục nhé!")
 
