@@ -1,7 +1,7 @@
 # Đồ án Môn học: Nhận diện và Phân loại Rác Thải Tự Động
 *(Môn: Học Sâu - Deep Learning)*
 
-Đây là mã nguồn chính thức cho Đồ án cuối kỳ, được thiết kế bám sát **100% yêu cầu Rubric**: Tối ưu hóa tài nguyên (Data-centric AI, Transfer Learning), Quản lý thực nghiệm (Early Stopping, Checkpointing, LR Scheduler, Ablation Study) và Code chuẩn Lập trình Hướng đối tượng (OOP).
+Đây là mã nguồn chính thức cho Đồ án cuối kỳ, được thiết kế tập trung vào: Tối ưu hóa tài nguyên (Data-centric AI, Transfer Learning), Quản lý thực nghiệm (Early Stopping, Checkpointing, LR Scheduler, Ablation Study) và Code chuẩn Lập trình Hướng đối tượng (OOP).
 
 ---
 
@@ -93,7 +93,8 @@ python src/trainers/train_yolo.py --data_path /đường_dẫn/data.yaml --epoch
 *(Hỗ trợ các models: `yolov8n.pt`, `yolov8s.pt`, `yolov8m.pt`, `yolov9c.pt`, `yolov8m-rtdetr.pt`)*
 
 #### 2.2 Huấn luyện Khối Phân loại (CNN) & Thực hiện Ablation Study
-Mô hình Phân loại được tích hợp sẵn chức năng **Ablation Study (So sánh siêu tham số)** qua Terminal, đáp ứng mục 2 Rubric.
+Mô hình Phân loại được tích hợp sẵn chức năng **Ablation Study (So sánh siêu tham số)** qua Terminal. 
+*Lưu ý: Hệ thống đã được code tự động áp dụng **Data Augmentation** (Xoay ảnh ngẫu nhiên, lật ảnh) và tính toán **Weighted Loss** ngầm bên dưới để chống mất cân bằng dữ liệu.*
 
 Bạn có thể thay đổi Động các tham số Learning Rate, Dropout, Model, Batch Size:
 ```bash
@@ -127,7 +128,7 @@ Hệ thống sẽ lấy file trọng số tải lên mạng phân loại và ch�
 ```bash
 python src/trainers/test_classifier.py --data_path datasets/classifier_data/test --model resnet50 --weights weights/best_resnet50.pth
 ```
-*Kết quả:* Xuất ra màn hình chỉ số Accuracy, Precision, Recall, F1 và tạo ra 2 file ảnh cực kỳ quan trọng cho Báo cáo (Rubric Phần 3):
+*Kết quả:* Xuất ra màn hình chỉ số Accuracy, Precision, Recall, F1 và tạo ra 2 file ảnh trực quan hóa cực kỳ quan trọng cho Báo cáo:
 1. `test_confusion_matrix_resnet50.png`: Ma trận nhầm lẫn.
 2. `test_error_analysis_resnet50.png`: Lưới trực quan hóa các mẫu dự đoán sai.
 
