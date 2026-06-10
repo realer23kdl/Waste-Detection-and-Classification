@@ -15,6 +15,7 @@ def main():
     # Cho phép linh hoạt chọn model (Ablation Study)
     parser.add_argument('--detector', type=str, default='yolov8s.pt', help="Tên trọng số mô hình khoanh vùng (VD: yolov8s.pt, rtdetr-l.pt)")
     parser.add_argument('--classifier', type=str, default='efficientnet_b0', choices=['resnet50', 'efficientnet_b0', 'mobilenet_v3'], help="Tên mạng phân loại")
+    parser.add_argument('--classifier_weights', type=str, default='weights/best_resnet50.pth', help="Đường dẫn file trọng số của mạng phân loại")
     parser.add_argument('--image', type=str, default='test_image.jpg', help="Đường dẫn ảnh test")
     
     args = parser.parse_args()
@@ -26,7 +27,7 @@ def main():
 
     elif args.pipeline == 'detect_and_classify':
         print(f">>> ĐANG CHẠY DETECT ({args.detector}) + CROP + CLASSIFY ({args.classifier}) <<<")
-        pipeline_p2 = DetectAndClassifyPipeline(yolo_weights=args.detector, classifier_model_name=args.classifier)
+        pipeline_p2 = DetectAndClassifyPipeline(yolo_weights=args.detector, resnet_weights=args.classifier_weights, classifier_model_name=args.classifier)
         try:
             pipeline_p2.run(args.image)
         except Exception as e:

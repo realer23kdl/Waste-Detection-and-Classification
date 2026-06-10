@@ -21,7 +21,7 @@ def download_image(url, save_path):
         out_file.write(response.read())
     print("Tải xong ảnh!")
 
-def run_test(image_path, detector_model, classifier_model):
+def run_test(image_path, detector_model, classifier_model, classifier_weights=None):
     if not os.path.exists(image_path):
         print(f"Không tìm thấy ảnh {image_path}. Sẽ thử tải một ảnh test mặc định...")
         image_path = 'test_trash.jpg'
@@ -30,7 +30,7 @@ def run_test(image_path, detector_model, classifier_model):
             download_image(img_url, image_path)
 
     print("\n--- BƯỚC 1 & 2: CHẠY NHẬN DIỆN VÀ PHÂN LOẠI ---")
-    pipeline = DetectAndClassifyPipeline(yolo_weights=detector_model, classifier_model_name=classifier_model)
+    pipeline = DetectAndClassifyPipeline(yolo_weights=detector_model, resnet_weights=classifier_weights, classifier_model_name=classifier_model)
     
     try:
         bounding_boxes, labels = pipeline.run(image_path)
@@ -101,7 +101,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Khối XAI: Vẽ Heatmap Grad-CAM và Error Analysis")
     parser.add_argument('--image', type=str, default='test_trash.jpg', help='Đường dẫn ảnh test')
     parser.add_argument('--detector', type=str, default='runs/detect/yolov8m_trashnet/weights/best.pt', help='Đường dẫn mô hình YOLO')
-    parser.add_argument('--classifier', type=str, default='efficientnet_b0', choices=['resnet50', 'efficientnet_b0', 'mobilenet_v3'], help='Kiến trúc mạng phân loại')
+    parser.add_argument('--classifier', type=str, default='resnet50', choices=['resnet50', 'efficientnet_b0', 'mobilenet_v3'], help='Kiến trúc mạng phân loại')
+    parser.add_argument('--classifier_weights', type=str, default='weights/best_resnet50.pth', help='Đường dẫn file trọng số classifier')
     
     args = parser.parse_args()
-    run_test(args.image, args.detector, args.classifier)
+    run_test(args.image, args.detector, args.classifier, args.classifier_weights)

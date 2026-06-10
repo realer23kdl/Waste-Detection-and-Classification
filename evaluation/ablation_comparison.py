@@ -11,12 +11,12 @@ from src.models.detector import TrashDetector
 from src.models.classifier import TrashClassifier
 from src.utils.cropper import ImageCropper
 
-def run_ablation_comparison(image_path, yolo_weights='yolov8n.pt', classifier_model='resnet50'):
+def run_ablation_comparison(image_path, yolo_weights='yolov8n.pt', classifier_model='resnet50', classifier_weights=None):
     print(f"BẮT ĐẦU THỰC NGHIỆM ABLATION STUDY TRÊN ẢNH: {image_path}")
     print(f"Mô hình sử dụng: {classifier_model.upper()} và {yolo_weights}")
     
     # Nạp mô hình
-    classifier = TrashClassifier(model_name=classifier_model, num_classes=6)
+    classifier = TrashClassifier(model_name=classifier_model, num_classes=6, model_weights_path=classifier_weights)
     detector = TrashDetector(model_path=yolo_weights, model_type='yolo' if 'yolo' in yolo_weights else 'rtdetr')
     cropper = ImageCropper(padding=10)
     
@@ -96,6 +96,7 @@ if __name__ == "__main__":
     parser.add_argument('--image', type=str, required=True, help="Đường dẫn tới bức ảnh test")
     parser.add_argument('--detector', type=str, default='yolov8s.pt', help="File weights của YOLO")
     parser.add_argument('--classifier', type=str, default='resnet50', help="Mô hình phân loại (resnet50/efficientnet_b0/mobilenet_v3)")
+    parser.add_argument('--classifier_weights', type=str, default='weights/best_resnet50.pth', help="File weights của Classifier")
     
     args = parser.parse_args()
-    run_ablation_comparison(args.image, args.detector, args.classifier)
+    run_ablation_comparison(args.image, args.detector, args.classifier, args.classifier_weights)
