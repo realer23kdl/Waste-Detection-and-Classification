@@ -59,5 +59,19 @@ def main():
     target_names = [k for k, v in sorted(test_dataset.class_to_idx.items(), key=lambda item: item[1])]
     print(classification_report(all_labels, all_preds, labels=range(len(target_names)), target_names=target_names, zero_division=0))
 
+    # Vẽ Confusion Matrix
+    print("\nĐang vẽ Ma trận nhầm lẫn (Confusion Matrix)...")
+    import matplotlib.pyplot as plt
+    from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
+    
+    cm = confusion_matrix(all_labels, all_preds, labels=range(len(target_names)))
+    disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=target_names)
+    
+    fig, ax = plt.subplots(figsize=(10, 8))
+    disp.plot(cmap=plt.cm.Blues, ax=ax, xticks_rotation=45)
+    plt.tight_layout()
+    plt.savefig('confusion_matrix_resnet50.png', dpi=150)
+    print("Đã lưu ma trận nhầm lẫn tại: confusion_matrix_resnet50.png")
+
 if __name__ == "__main__":
     main()
