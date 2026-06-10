@@ -185,9 +185,21 @@ if __name__ == "__main__":
         save_path = f"weights/best_{args.model}.pth"
         train_losses, val_losses = trainer.train(num_epochs=args.epochs, save_path=save_path)
         
-        print(f"\n[HOÀN TẤT] Quá trình huấn luyện mô hình đã kết thúc. Trọng số được lưu tại: {save_path}")
+        # 8. Vẽ biểu đồ hàm mất mát (Loss Curve)
+        import matplotlib.pyplot as plt
+        plt.figure(figsize=(10, 6))
+        plt.plot(train_losses, label='Train Loss', color='blue')
+        plt.plot(val_losses, label='Validation Loss', color='red')
+        plt.xlabel('Epochs')
+        plt.ylabel('Loss')
+        plt.title(f'Biểu đồ Hàm mất mát (Loss Curve) - {args.model.upper()}')
+        plt.legend()
+        plt.grid(True)
+        loss_curve_path = f'loss_curve_{args.model}.png'
+        plt.savefig(loss_curve_path, dpi=150)
+        print(f"\n[HOÀN TẤT] Đã vẽ và lưu biểu đồ Loss tại: {loss_curve_path}")
         
-        print("\n[HOÀN TẤT] Quá trình huấn luyện và đánh giá mô hình đã kết thúc.")
+        print(f"[HOÀN TẤT] Quá trình huấn luyện mô hình đã kết thúc. Trọng số được lưu tại: {save_path}")
         
     else:
         print(f"Không tìm thấy thư mục dữ liệu: {DATA_DIR}")
