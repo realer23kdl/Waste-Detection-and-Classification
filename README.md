@@ -140,11 +140,13 @@ Sau khi huấn luyện xong cả 2 mô hình, bạn có thể chạy luồng Inf
 ```bash
 python evaluation/run_inference.py \
     --pipeline detect_and_classify \
+    --image test_image.jpg \
     --detector runs/detect/yolov8m_trashnet/weights/best.pt \
     --classifier resnet50 \
-    --image test_image.jpg
+    --classifier_weights weights/best_resnet50.pth \
+    --conf 0.25
 ```
-*Kết quả:* Hệ thống sẽ gọi YOLO để vẽ Bounding Box, sau đó dùng ResNet50 để gắn nhãn phân loại (Glass, Plastic...) lên box đó.
+*Kết quả:* Hệ thống sẽ gọi YOLO để vẽ Bounding Box, dùng ResNet50 để gắn nhãn phân loại kèm Độ tin cậy (Confidence), và cuối cùng **tự động lưu ảnh trực quan ra file `inference_result.jpg`**.
 
 ---
 
@@ -156,7 +158,8 @@ python evaluation/run_inference.py \
 python evaluation/ablation_comparison.py \
     --image test_image.jpg \
     --detector runs/detect/yolov8m_trashnet/weights/best.pt \
-    --classifier resnet50
+    --classifier resnet50 \
+    --classifier_weights weights/best_resnet50.pth
 ```
 *Kết quả:* Trả về file ảnh `ablation_comparison_result.png` chia làm 2 nửa màn hình. Nửa trái là kết quả sai lệch khi Classifier bị nhiễu bởi hậu cảnh. Nửa phải là kết quả chính xác khi YOLO đã loại bỏ hậu cảnh và chỉ cắt đúng cục rác. Bức ảnh này **cực kỳ đắt giá** để đưa vào báo cáo!
 
@@ -170,6 +173,7 @@ python evaluation/ablation_comparison.py \
 python evaluation/error_analysis.py \
     --image test_image.jpg \
     --detector runs/detect/yolov8m_trashnet/weights/best.pt \
-    --classifier efficientnet_b0
+    --classifier resnet50 \
+    --classifier_weights weights/best_resnet50.pth
 ```
 *Kết quả:* Trả về file `test_heatmap_gradcam.png` soi chiếu vào điểm đặc trưng của rác (Ví dụ: AI nhìn vào nếp gấp của túi nilon để đưa ra quyết định).
