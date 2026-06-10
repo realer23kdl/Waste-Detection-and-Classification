@@ -136,6 +136,7 @@ python src/trainers/train_classifier.py --model efficientnet_b0 --learning_rate 
 # %tensorboard --logdir runs
 
 ```
+*(Hỗ trợ các models Phân loại: `resnet50`, `efficientnet_b0`, `mobilenet_v3`)*
 
 ---
 
@@ -154,6 +155,8 @@ Hệ thống sẽ lấy file trọng số tải lên mạng phân loại và ch�
 ```bash
 python src/trainers/test_classifier.py --data_path datasets/classifier_data/test --model resnet50 --weights weights/best_resnet50.pth
 ```
+*(Mẹo: Nếu bạn huấn luyện mạng khác, hãy đổi tên ở cờ `--model` và `--weights` tương ứng. Ví dụ với EfficientNet-B0 là: `--model efficientnet_b0 --weights weights/best_efficientnet_b0.pth`)*
+
 *Kết quả:* Xuất ra màn hình chỉ số Accuracy, Precision, Recall, F1 và tạo ra 2 file ảnh trực quan hóa cực kỳ quan trọng cho Báo cáo:
 1. `test_confusion_matrix_resnet50.png`: Ma trận nhầm lẫn.
 2. `test_error_analysis_resnet50.png`: Lưới trực quan hóa các mẫu dự đoán sai.
