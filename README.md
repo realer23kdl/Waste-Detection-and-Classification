@@ -128,7 +128,7 @@ Bạn có thể thay đổi Động các tham số Learning Rate, Dropout, Model
 python src/trainers/train_classifier.py --data_path datasets/classifier_data/train --model resnet50 --epochs 50 --batch 32 --learning_rate 0.0001 --freeze_base
 
 # Lệnh chạy Thực nghiệm Ablation Study (Đổi Model, Dropout) kèm TensorBoard
-python src/trainers/train_classifier.py --model efficientnet_b0 --learning_rate 0.0001 --dropout 0.5 --freeze_base --use_tensorboard
+python src/trainers/train_classifier.py --model efficientnet_b0 --learning_rate 0.0001 --dropout 0.5 --freeze_base --scheduler cosine --use_tensorboard
 
 # Xem biểu đồ ngay trên Kaggle/Colab:
 # Mở một Ô Cell mới và chạy 2 lệnh sau:

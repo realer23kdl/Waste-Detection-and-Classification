@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "waste-detection-hybrid"
+version = "1.0.0"
+description = "Waste Detection with Transfer Learning using YOLO, RT-DETR, and ResNet/EfficientNet/MobileNet."
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [
+    { name = "Deep Learning Group" }
+]
+license = { text = "MIT" }
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-q"
+
+[tool.black]
+line-length = 88
+target-version = ["py310"]

@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.optim.lr_scheduler import ReduceLROnPlateau
+from torch.optim.lr_scheduler import ReduceLROnPlateau, CosineAnnealingLR
 from torch.utils.data import DataLoader
 from torchvision import transforms, models
 import numpy as np
@@ -31,7 +31,7 @@ class ClassifierTrainer:
     Vòng lặp huấn luyện (Training Loop) chuyên nghiệp cho PyTorch.
     Bao gồm: Forward, Backward, Scheduler, Early Stopping, Checkpointing, và Weighted Loss.
     """
-    def __init__(self, model, train_loader, val_loader, device='cuda', patience=5, class_weights=None, learning_rate=0.001, use_tensorboard=False):
+    def __init__(self, model, train_loader, val_loader, device='cuda', patience=5, class_weights=None, learning_rate=0.001, use_tensorboard=False, scheduler_type='plateau', epochs=50):
         set_seed(42)
         
         self.model = model.to(device)
@@ -52,8 +52,13 @@ class ClassifierTrainer:
             self.criterion = nn.CrossEntropyLoss()
         
         self.optimizer = optim.Adam(self.model.parameters(), lr=learning_rate)
-        # Cập nhật PyTorch >= 2.2: Hàm ReduceLROnPlateau đã loại bỏ tham số verbose
-        self.scheduler = ReduceLROnPlateau(self.optimizer, mode='min', factor=0.1, patience=2)
+        
+        if scheduler_type == 'cosine':
+            self.scheduler = CosineAnnealingLR(self.optimizer, T_max=epochs, eta_min=1e-6)
+            print("[Trainer] Đã sử dụng CosineAnnealingLR Scheduler")
+        else:
+            self.scheduler = ReduceLROnPlateau(self.optimizer, mode='min', factor=0.1, patience=2)
+            print("[Trainer] Đã sử dụng ReduceLROnPlateau Scheduler")
         
         self.patience = patience
         self.best_val_loss = float('inf')
@@ -104,7 +109,10 @@ class ClassifierTrainer:
                 self.writer.add_scalar("Loss/Validation", val_loss, epoch)
                 self.writer.add_scalar("Learning Rate", self.optimizer.param_groups[0]['lr'], epoch)
             
-            self.scheduler.step(val_loss)
+            if isinstance(self.scheduler, ReduceLROnPlateau):
+                self.scheduler.step(val_loss)
+            else:
+                self.scheduler.step()
             
             if val_loss < self.best_val_loss:
                 self.best_val_loss = val_loss
@@ -135,6 +143,7 @@ if __name__ == "__main__":
     parser.add_argument('--learning_rate', type=float, default=0.0001, help="Tốc độ học (Nên để 1e-4 cho Transfer Learning)")
     parser.add_argument('--dropout', type=float, default=0.3, help="Tỷ lệ Dropout")
     parser.add_argument('--patience', type=int, default=5, help="Early stopping patience")
+    parser.add_argument('--scheduler', type=str, default='plateau', choices=['plateau', 'cosine'], help="Bộ điều chỉnh Learning Rate")
     parser.add_argument('--use_tensorboard', action='store_true', help="Bật log TensorBoard")
     parser.add_argument('--freeze_base', action='store_true', help="Đóng băng các layer Conv của mạng pre-trained để chỉ train lớp phân loại cuối")
     args = parser.parse_args()
@@ -186,7 +195,9 @@ if __name__ == "__main__":
             patience=args.patience,
             class_weights=class_weights,
             learning_rate=args.learning_rate,
-            use_tensorboard=args.use_tensorboard
+            use_tensorboard=args.use_tensorboard,
+            scheduler_type=args.scheduler,
+            epochs=args.epochs
         )
         
         # 7. Bắt đầu huấn luyện

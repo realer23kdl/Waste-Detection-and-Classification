@@ -26,8 +26,8 @@ def create_yaml_if_needed(data_path):
             'train': os.path.join(data_path, 'train/images'),
             'val': os.path.join(data_path, 'val/images'),
             'test': os.path.join(data_path, 'val/images'),
-            'nc': 6,
-            'names': ['Glass', 'Paper', 'Cardboard', 'Plastic', 'Metal', 'Trash']
+            'nc': 1,
+            'names': ['litter']
         }
         with open(yaml_path, 'w') as f:
             yaml.dump(data_yaml, f)
